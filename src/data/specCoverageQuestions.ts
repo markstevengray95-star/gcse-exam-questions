@@ -1,4 +1,4 @@
-import type { Question } from './questions';
+import type { Question } from './questionTypes';
 import { specificationPoints } from './specification';
 
 export type SpecCoverageQuestion = Question & { specificationPointId: string };
