@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     area = String(body?.area || '').trim().slice(0, 160);
     marks = Math.max(2, Math.min(6, Math.trunc(Number(body?.marks) || 4)));
     difficulty = normaliseDifficulty(body?.difficulty);
-    const activeKey = String(body?.apiKey || '') || process.env.GEMINI_API_KEY;
+    const activeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
     if (area.length < 3) {
       return NextResponse.json({ error: 'Type a GCSE science area or skill, for example “osmosis”, “electrolysis” or “wave speed”.' }, { status: 400 });
