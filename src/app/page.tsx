@@ -21,6 +21,7 @@ import { LearningHub } from '@/components/LearningHub';
 import { TeacherDashboard } from '@/components/TeacherDashboard';
 import { AccessibilityMenu } from '@/components/AccessibilityMenu';
 import { DiagramAnswerPad } from '@/components/DiagramAnswerPad';
+import { MarkReviewTools } from '@/components/MarkReviewTools';
 import {
   AttemptHistoryPanel,
   ConfidenceCalibration,
@@ -444,6 +445,19 @@ export default function Home() {
     }
   };
 
+  const handleTeacherOverride = (marks: number, note: string) => {
+    setFeedback(previous => previous ? {
+      ...previous,
+      marksAwarded: marks,
+      examinerConfidence: 100,
+      confidenceReason: note ? `Teacher override: ${note}` : 'Teacher-reviewed final mark.',
+      reviewRecommended: false,
+    } : previous);
+    if (!isGeneratedQuestion && questions.some(question => question.id === currentQuestion.id)) {
+      setPracticeResults(previous => ({ ...previous, [currentQuestion.id]: { marks, total: currentQuestion.maxMarks } }));
+    }
+  };
+
   const handleRewrite = () => {
     setFeedback(null);
     setAnswerImage(null);
@@ -790,6 +804,7 @@ export default function Home() {
               <Button variant="outline" size="sm" onClick={() => window.print()}>Print report</Button>
             </div>
             <FeedbackDisplay result={feedback} onRewrite={activeTab === 'practice' ? handleRewrite : undefined} />
+            {activeTab === 'practice' ? <div className="mt-6"><MarkReviewTools question={currentQuestion} result={feedback} studentAnswer={answer} onOverride={handleTeacherOverride} /></div> : null}
             {activeTab === 'practice' ? (
               <div className="mt-6 space-y-6">
                 {latestAttempt ? <ConfidenceCalibration studentConfidence={latestAttempt.studentConfidence} result={feedback} /> : null}
