@@ -126,14 +126,13 @@ export async function POST(req: NextRequest) {
       markSchemeFileMimeType,
       markSchemeText,
       paperLabel,
-      apiKey,
     } = body;
 
     if (!examFileData && !String(examText || '').trim()) {
       return NextResponse.json({ error: 'Please provide the completed student script or paste the student answers.' }, { status: 400 });
     }
 
-    const activeKey = apiKey || process.env.GEMINI_API_KEY;
+    const activeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     if (!activeKey) {
       return NextResponse.json({ error: 'Whole-exam marking requires a Gemini API key in this session or on the server.' }, { status: 400 });
     }
