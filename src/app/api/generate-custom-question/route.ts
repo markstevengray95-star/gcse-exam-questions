@@ -65,7 +65,7 @@ function fallbackQuestion(area: string, marks: number, difficulty: 'Easy' | 'Med
     maxMarks: marks,
     difficulty,
     questionType: marks === 6 ? 'Extended 6-mark level-of-response' as const : 'Short explanation' as const,
-    prompt: marks === 6 ? base.prompt : `${base.prompt} Give enough clear physics for ${marks} marks.`,
+    prompt: marks === 6 ? base.prompt : `${base.prompt} Give enough clear GCSE science for ${marks} marks.`,
     markScheme: base.markScheme.slice(0, marks),
     source: `${reason} Closest verified AQA area: ${point.specCode} ${point.label}.`,
   };
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
     const activeKey = String(body?.apiKey || '') || process.env.GEMINI_API_KEY;
 
     if (area.length < 3) {
-      return NextResponse.json({ error: 'Type a physics area or skill, for example “capacitor discharge graphs”.' }, { status: 400 });
+      return NextResponse.json({ error: 'Type a GCSE science area or skill, for example “osmosis”, “electrolysis” or “wave speed”.' }, { status: 400 });
     }
 
     const closest = closestSpecificationPoint(area);
@@ -99,18 +99,18 @@ export async function POST(req: NextRequest) {
         generationConfig: { responseMimeType: 'application/json', responseSchema, temperature: 0.35 },
       });
 
-      const prompt = `Create ONE original AQA A-level Physics practice question focused tightly on: "${area}".
+      const prompt = `Create ONE original AQA GCSE Science practice question focused tightly on: "${area}".
 Closest verified AQA specification area: ${closest.specCode} ${closest.label}.
 Difficulty: ${difficulty}. Maximum marks: ${marks}.
 
 Rules:
-- Stay strictly within AQA A-level Physics 7408 knowledge and skills, including the optional topics where relevant.
+- Stay strictly within the current AQA GCSE Biology 8461, Chemistry 8462, Physics 8463 and Combined Science: Trilogy 8464 knowledge and skills for the closest verified area.
 - Do not copy or closely imitate wording from a real copyrighted past-paper question.
 - Make numerical data internally consistent and recompute any calculation yourself.
 - The mark scheme must contain exactly ${marks} independently creditable one-mark points and should label them [B1], [C1] or [A1] where sensible.
 - The model answer must earn all ${marks} marks and use correct SI units, symbols, superscripts and significant figures.
 - Use one questionType value exactly: Short calculation, Short explanation, Data analysis, Extended 6-mark level-of-response. Only use the extended type for a genuine 6-mark response.
-- year must be exactly Year 12 or Year 13.
+- year must be exactly Year 10 or Year 11.
 - requiredKeywords are diagnostic only and must not replace proper mark-scheme logic.
 Return only the structured JSON.`;
 
@@ -126,12 +126,16 @@ Return only the structured JSON.`;
         question: {
           id: `custom-generated-${Date.now()}`,
           specificationPointId: closest.id,
-          year: parsed.year === 'Year 13' ? 'Year 13' : 'Year 12',
+          year: parsed.year === 'Year 10' ? 'Year 10' : 'Year 11',
+          subject: closest.subject,
+          paper: closest.paper,
+          course: closest.course,
+          tier: closest.tier,
           unit: String(parsed.unit || closest.unit),
           topic: String(parsed.topic || closest.topic),
           subTopic: String(parsed.subTopic || closest.label),
           commandWord: String(parsed.commandWord || 'Explain'),
-          commandWordDefinition: String(parsed.commandWordDefinition || 'Respond using the physics requested by the command word.'),
+          commandWordDefinition: String(parsed.commandWordDefinition || 'Respond using the science requested by the command word.'),
           questionType: normaliseQuestionType(parsed.questionType, marks),
           prompt: String(parsed.prompt),
           maxMarks: marks,
@@ -157,6 +161,6 @@ Return only the structured JSON.`;
         // Fall through to the final error.
       }
     }
-    return NextResponse.json({ error: 'Could not generate a reliable A-level Physics question. Please try again.' }, { status: 500 });
+    return NextResponse.json({ error: 'Could not generate a reliable GCSE Science question. Please try again.' }, { status: 500 });
   }
 }
