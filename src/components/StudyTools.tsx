@@ -1,0 +1,7 @@
+"use client";
+import { useMemo,useState } from 'react';
+export function StudyTools({marks,total,topic}:{marks:number;total:number;topic?:string}){
+ const [show,setShow]=useState(false); const pct=total?Math.round(marks/total*100):0;
+ const advice=useMemo(()=>pct>=80?'Challenge yourself with harder extended responses and timed questions.':pct>=60?'Target the missing marking points and practise calculations under time pressure.':'Revisit the core equations, definitions and worked examples before attempting another full answer.',[pct]);
+ return <div className="border rounded-lg p-4 bg-white"><div className="flex justify-between items-center"><div><h3 className="font-bold">Revision tools</h3><p className="text-sm text-gray-600">Personalised next steps from this result{topic?` · ${topic}`:''}</p></div><button onClick={()=>setShow(!show)} className="border rounded px-3 py-1 text-sm">{show?'Hide':'Show'}</button></div>{show&&<div className="mt-3 grid md:grid-cols-3 gap-3 text-sm"><div className="p-3 bg-blue-50 rounded"><strong>Next step</strong><p className="mt-1">{advice}</p></div><div className="p-3 bg-purple-50 rounded"><strong>Exam technique</strong><p className="mt-1">Always show the equation, substitution, units and final conclusion for calculations.</p></div><div className="p-3 bg-green-50 rounded"><strong>Retest</strong><p className="mt-1">Redo a similar question later without viewing the model answer.</p></div></div>}</div>
+}
