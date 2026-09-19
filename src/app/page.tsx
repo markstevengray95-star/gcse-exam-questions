@@ -724,6 +724,7 @@ export default function Home() {
                   <Badge variant="outline">{currentQuestion.subject}</Badge>
                   <Badge variant="outline">{currentQuestion.paper}</Badge>
                   <Badge variant="outline">{currentQuestion.tier === 'Higher only' ? 'Higher only' : 'Foundation + Higher'}</Badge>
+                  {currentQuestion.bankSource ? <Badge className="bg-violet-700">Adapted uploaded bank</Badge> : null}
                 </div>
 
                 <div className="mt-4 text-xl font-semibold leading-relaxed">{renderPrompt(currentQuestion.prompt)}</div>
