@@ -74,3 +74,44 @@ textarea {
 .katex {
   font-size: 1.04em;
 }
+
+
+html {
+  font-size: calc(16px * var(--gcse-font-scale, 1));
+}
+
+html[data-gcse-readable="on"] body,
+html[data-gcse-readable="on"] button,
+html[data-gcse-readable="on"] input,
+html[data-gcse-readable="on"] select,
+html[data-gcse-readable="on"] textarea {
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  letter-spacing: 0.015em;
+  line-height: 1.6;
+}
+
+html[data-gcse-contrast="high"] body {
+  background: #ffffff;
+  color: #000000;
+}
+
+html[data-gcse-contrast="high"] .bg-gray-50,
+html[data-gcse-contrast="high"] .bg-slate-50 {
+  background-color: #ffffff !important;
+}
+
+html[data-gcse-contrast="high"] .text-gray-500,
+html[data-gcse-contrast="high"] .text-gray-600,
+html[data-gcse-contrast="high"] .text-slate-500,
+html[data-gcse-contrast="high"] .text-slate-600 {
+  color: #111827 !important;
+}
+
+html[data-gcse-motion="reduced"] *,
+html[data-gcse-motion="reduced"] *::before,
+html[data-gcse-motion="reduced"] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
