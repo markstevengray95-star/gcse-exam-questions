@@ -30,7 +30,7 @@ function calculationPool() {
 }
 
 export function CalculationPractice({ apiKey = '' }: { apiKey?: string }) {
-  const pool = useMemo(calculationPool, []);
+  const pool = useMemo(() => calculationPool(), []);
   const topics = useMemo(() => Array.from(new Set(pool.map(question => question.topic))).sort(), [pool]);
   const [topic, setTopic] = useState('all');
   const [difficulty, setDifficulty] = useState('all');
