@@ -8,7 +8,6 @@ import { Upload, Image as ImageIcon } from 'lucide-react';
 
 interface CustomMarkerProps {
   onFeedbackReceived: (result: AnalysisResult | null) => void;
-  apiKey: string;
   provider?: 'online' | 'offline' | string;
 }
 
@@ -20,7 +19,7 @@ function validateImage(file: File) {
   return '';
 }
 
-export function CustomMarker({ onFeedbackReceived, apiKey, provider = 'online' }: CustomMarkerProps) {
+export function CustomMarker({ onFeedbackReceived, provider = 'online' }: CustomMarkerProps) {
   const [questionPrompt, setQuestionPrompt] = useState('');
   const [questionImage, setQuestionImage] = useState<File | null>(null);
   const [commandWord, setCommandWord] = useState('');
@@ -74,7 +73,6 @@ export function CustomMarker({ onFeedbackReceived, apiKey, provider = 'online' }
       const payload: Record<string, unknown> = {
         commandWord: commandWord.trim(),
         maxMarks: Math.max(1, Math.min(25, Math.trunc(maxMarks || 1))),
-        apiKey,
         provider,
       };
 
