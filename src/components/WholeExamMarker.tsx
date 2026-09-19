@@ -154,7 +154,7 @@ async function optimiseExamPhoto(file: File): Promise<{ data: string; mimeType: 
   return { data: dataUrl.slice(dataUrl.indexOf(',') + 1), mimeType: 'image/jpeg' };
 }
 
-export function WholeExamMarker({ apiKey }: { apiKey: string }) {
+export function WholeExamMarker() {
   const [examFile, setExamFile] = useState<File | null>(null);
   const [scriptPhotos, setScriptPhotos] = useState<PhotoPage[]>([]);
   const [questionPaperFile, setQuestionPaperFile] = useState<File | null>(null);
@@ -288,7 +288,6 @@ export function WholeExamMarker({ apiKey }: { apiKey: string }) {
             pageNumber: index + 1,
             totalPages: scriptPhotos.length,
             paperLabel: paperLabel.trim(),
-            apiKey,
           }),
         });
         const data = await response.json();
@@ -330,7 +329,6 @@ export function WholeExamMarker({ apiKey }: { apiKey: string }) {
       const payload: Record<string, unknown> = {
         examText: examText.trim(),
         paperLabel: paperLabel.trim(),
-        apiKey,
         scriptPages,
       };
       if (questionPaperFile) await appendFile(questionPaperFile, payload, 'questionPaper');
