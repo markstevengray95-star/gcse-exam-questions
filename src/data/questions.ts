@@ -1,5 +1,6 @@
 import { specCoverageQuestions, specificationCoverageAudit } from './specCoverageQuestions';
 import { expandedQuestionBank } from './expandedQuestionBank';
+import { recurringExamQuestionBank } from './recurringExamQuestionBank';
 import type { Question } from './questionTypes';
 export type { Question } from './questionTypes';
 
@@ -147,6 +148,7 @@ export const questions: Question[] = [
   ...specCoverageQuestions,
   ...calculationQuestions,
   ...expandedQuestionBank,
+  ...recurringExamQuestionBank,
 ];
 
 function auditQuestionBank(bank: Question[]) {
@@ -168,7 +170,21 @@ function auditQuestionBank(bank: Question[]) {
     calculations: bank.filter(question => question.questionType === 'Short calculation').length,
     extended: bank.filter(question => question.questionType === 'Extended 6-mark level-of-response').length,
     practicals: bank.filter(question => question.topic.toLowerCase().includes('required practical')).length,
+    recurringExamStyle: recurringExamQuestionBank.length,
   };
+}
+
+const mainTopics = [
+  'Cell biology','Organisation','Infection and response','Bioenergetics','Homeostasis and response','Inheritance, variation and evolution','Ecology',
+  'Atomic structure and the periodic table','Bonding, structure and properties','Quantitative chemistry','Chemical changes','Energy changes','Rate and extent of chemical change','Organic chemistry','Chemical analysis','Chemistry of the atmosphere','Using resources',
+  'Energy','Electricity','Particle model of matter','Atomic structure','Forces','Waves','Magnetism and electromagnetism','Space physics',
+];
+
+for (const topic of mainTopics) {
+  const topicQuestions = questions.filter(question => question.topic === topic);
+  const subTopics = new Set(topicQuestions.map(question => question.subTopic));
+  if (topicQuestions.length < 4) throw new Error('Insufficient question coverage for topic: ' + topic);
+  if (subTopics.size < 3) throw new Error('Insufficient subtopic variety for topic: ' + topic);
 }
 
 export const questionBankAudit = auditQuestionBank(questions);
