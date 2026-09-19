@@ -15,10 +15,9 @@ export type GeneratedQuestion = Question & { source: string };
 type Props = {
   onUse?: (question: GeneratedQuestion) => void;
   onPracticeQuestion?: (questionId: string) => void;
-  apiKey?: string;
 };
 
-export function QuestionGenerator({ onUse, onPracticeQuestion, apiKey = '' }: Props) {
+export function QuestionGenerator({ onUse, onPracticeQuestion }: Props) {
   const [mode, setMode] = useState<'generator' | 'calculations' | 'mock' | 'mistakes'>('generator');
   const [topic, setTopic] = useState(specificationPoints[0].id);
   const [marks, setMarks] = useState(6);
@@ -39,13 +38,9 @@ export function QuestionGenerator({ onUse, onPracticeQuestion, apiKey = '' }: Pr
     setError('');
 
     try {
-      let activeKey = apiKey;
-      if (!activeKey && typeof window !== 'undefined') {
-        try { activeKey = sessionStorage.getItem('aqaGcseScienceApiKey') || ''; } catch { activeKey = ''; }
-      }
       const endpoint = custom ? '/api/generate-custom-question' : '/api/generate-question';
       const payload = custom
-        ? { area: customArea.trim(), marks, difficulty, apiKey: activeKey }
+        ? { area: customArea.trim(), marks, difficulty }
         : { topic, marks, difficulty };
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -81,7 +76,7 @@ export function QuestionGenerator({ onUse, onPracticeQuestion, apiKey = '' }: Pr
         </div>
       </div>
 
-      {mode === 'calculations' ? <CalculationPractice apiKey={apiKey} /> : mode === 'mock' ? <MockExamBuilder apiKey={apiKey} /> : mode === 'mistakes' ? <MistakeNotebook onPracticeQuestion={onPracticeQuestion} /> : (
+      {mode === 'calculations' ? <CalculationPractice /> : mode === 'mock' ? <MockExamBuilder /> : mode === 'mistakes' ? <MistakeNotebook onPracticeQuestion={onPracticeQuestion} /> : (
         <div className="space-y-5 rounded-2xl border bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
