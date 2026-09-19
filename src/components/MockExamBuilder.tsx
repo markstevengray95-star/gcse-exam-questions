@@ -71,7 +71,7 @@ function courseLabel(course: CourseKind) {
   return 'Mixed GCSE Science';
 }
 
-export function MockExamBuilder({ apiKey = '' }: { apiKey?: string }) {
+export function MockExamBuilder() {
   const [phase, setPhase] = useState<Phase>('setup');
   const [course, setCourse] = useState<CourseKind>('combined');
   const [paper, setPaper] = useState<PaperKind>('paper1');
@@ -152,10 +152,6 @@ export function MockExamBuilder({ apiKey = '' }: { apiKey?: string }) {
     const marked: MarkedRow[] = [];
 
     try {
-      let activeKey = apiKey;
-      if (!activeKey) {
-        try { activeKey = sessionStorage.getItem('aqaGcseScienceApiKey') || ''; } catch { activeKey = ''; }
-      }
 
       for (let index = 0; index < paperQuestions.length; index += 1) {
         const question = paperQuestions[index];
@@ -178,8 +174,7 @@ export function MockExamBuilder({ apiKey = '' }: { apiKey?: string }) {
             markScheme: question.markScheme,
             modelAnswer: question.modelAnswer,
             strictness: 'standard',
-            provider: activeKey ? 'online' : 'offline',
-            apiKey: activeKey,
+            provider: 'online',
           }),
         });
         const data = await response.json();
