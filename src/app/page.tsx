@@ -137,7 +137,15 @@ export default function Home() {
   const [isRewriteMode, setIsRewriteMode] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
 
-  const uniqueTopics = useMemo(() => Array.from(new Set(questions.map(question => question.topic))).sort(), []);
+  const availableTopics = useMemo(() => Array.from(new Set(
+    questions
+      .filter(question =>
+        (subjectFilter === 'all' || question.subject === subjectFilter || question.subject === 'Science') &&
+        (courseFilter !== 'combined' || question.course !== 'Separate only') &&
+        (tierFilter !== 'foundation' || question.tier !== 'Higher only') &&
+        (paperFilter === 'all' || question.paper === paperFilter || question.paper === 'Across papers'))
+      .map(question => question.topic),
+  )).sort(), [subjectFilter, courseFilter, tierFilter, paperFilter]);
   const filteredQuestions = useMemo(
     () => questions.filter(question =>
       (subjectFilter === 'all' || question.subject === subjectFilter || question.subject === 'Science') &&
@@ -295,6 +303,29 @@ export default function Home() {
     localStorage.removeItem('aqaGcseScienceAttemptHistory');
     localStorage.removeItem('aqaGcseScienceDraftAnswer');
     localStorage.removeItem('aqaGcseScienceSelectedQuestion');
+  };
+
+  const firstMatchingQuestion = (overrides: {
+    subject?: string;
+    course?: string;
+    tier?: string;
+    paper?: string;
+    topic?: string;
+    difficulty?: string;
+  } = {}) => {
+    const nextSubject = overrides.subject ?? subjectFilter;
+    const nextCourse = overrides.course ?? courseFilter;
+    const nextTier = overrides.tier ?? tierFilter;
+    const nextPaper = overrides.paper ?? paperFilter;
+    const nextTopic = overrides.topic ?? topicFilter;
+    const nextDifficulty = overrides.difficulty ?? difficultyFilter;
+    return questions.find(question =>
+      (nextSubject === 'all' || question.subject === nextSubject || question.subject === 'Science') &&
+      (nextCourse !== 'combined' || question.course !== 'Separate only') &&
+      (nextTier !== 'foundation' || question.tier !== 'Higher only') &&
+      (nextPaper === 'all' || question.paper === nextPaper || question.paper === 'Across papers') &&
+      (nextTopic === 'all' || question.topic === nextTopic) &&
+      (nextDifficulty === 'all' || question.difficulty === nextDifficulty));
   };
 
   const handleRandomQuestion = () => {
@@ -594,16 +625,16 @@ export default function Home() {
                 <Button variant="outline" size="sm" onClick={handleRandomQuestion}>Random question</Button>
                 <Button variant="outline" size="sm" onClick={handleWeakTopicQuestion}>Target weak topic</Button>
 
-                <select value={subjectFilter} onChange={event => { setSubjectFilter(event.target.value); setTopicFilter('all'); }} className="rounded border p-2 text-sm" aria-label="Filter by science">
+                <select value={subjectFilter} onChange={event => { const value = event.target.value; setSubjectFilter(value); setTopicFilter('all'); const target = firstMatchingQuestion({ subject: value, topic: 'all' }); if (target) selectBankQuestion(target.id); }} className="rounded border p-2 text-sm" aria-label="Filter by science">
                   <option value="all">All sciences</option><option value="Biology">Biology</option><option value="Chemistry">Chemistry</option><option value="Physics">Physics</option>
                 </select>
-                <select value={courseFilter} onChange={event => setCourseFilter(event.target.value)} className="rounded border p-2 text-sm" aria-label="Filter by course">
+                <select value={courseFilter} onChange={event => { const value = event.target.value; setCourseFilter(value); const target = firstMatchingQuestion({ course: value }); if (target) selectBankQuestion(target.id); }} className="rounded border p-2 text-sm" aria-label="Filter by course">
                   <option value="all">Combined + Separate</option><option value="combined">Combined Science</option><option value="separate">Separate Science</option>
                 </select>
-                <select value={tierFilter} onChange={event => setTierFilter(event.target.value)} className="rounded border p-2 text-sm" aria-label="Filter by tier">
+                <select value={tierFilter} onChange={event => { const value = event.target.value; setTierFilter(value); const target = firstMatchingQuestion({ tier: value }); if (target) selectBankQuestion(target.id); }} className="rounded border p-2 text-sm" aria-label="Filter by tier">
                   <option value="all">All tiers</option><option value="foundation">Foundation</option><option value="higher">Higher</option>
                 </select>
-                <select value={paperFilter} onChange={event => setPaperFilter(event.target.value)} className="rounded border p-2 text-sm" aria-label="Filter by paper">
+                <select value={paperFilter} onChange={event => { const value = event.target.value; setPaperFilter(value); const target = firstMatchingQuestion({ paper: value }); if (target) selectBankQuestion(target.id); }} className="rounded border p-2 text-sm" aria-label="Filter by paper">
                   <option value="all">Both papers</option><option value="Paper 1">Paper 1</option><option value="Paper 2">Paper 2</option>
                 </select>
 
@@ -625,7 +656,7 @@ export default function Home() {
                   aria-label="Filter by topic"
                 >
                   <option value="all">All topics</option>
-                  {uniqueTopics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
+                  {availableTopics.map(topic => <option key={topic} value={topic}>{topic}</option>)}
                 </select>
 
                 <select
