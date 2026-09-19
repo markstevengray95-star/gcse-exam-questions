@@ -112,10 +112,8 @@ function commandAdvice(commandWord: string) {
 }
 
 export function LearningHub({
-  apiKey = '',
   onPracticeQuestion,
 }: {
-  apiKey?: string;
   onPracticeQuestion?: (questionId: string) => void;
 }) {
   const [tab, setTab] = useState<HubTab>('overview');
@@ -533,8 +531,8 @@ export function LearningHub({
         </div>
       ) : null}
 
-      {tab === 'calculations' ? <CalculationPractice apiKey={apiKey} /> : null}
-      {tab === 'mock' ? <MockExamBuilder apiKey={apiKey} /> : null}
+      {tab === 'calculations' ? <CalculationPractice /> : null}
+      {tab === 'mock' ? <MockExamBuilder /> : null}
       {tab === 'mistakes' ? <MistakeNotebook onPracticeQuestion={onPracticeQuestion} /> : null}
 
       {tab === 'skills' ? (
