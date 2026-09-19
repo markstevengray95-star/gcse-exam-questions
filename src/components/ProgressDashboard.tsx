@@ -85,8 +85,8 @@ export function ProgressDashboard({ averagePercent, earnedMarks, availableMarks,
   const [attemptHistory, setAttemptHistory] = useState<AttemptHistory>({});
 
   useEffect(() => {
-    setSavedResults(safeResults(localStorage.getItem('aqaPhysicsPracticeResults')));
-    setAttemptHistory(safeAttempts(localStorage.getItem('aqaPhysicsAttemptHistory')));
+    setSavedResults(safeResults(localStorage.getItem('aqaGcseSciencePracticeResults')));
+    setAttemptHistory(safeAttempts(localStorage.getItem('aqaGcseScienceAttemptHistory')));
   }, []);
 
   const grade = getIndicativeGrade(averagePercent);
@@ -118,8 +118,8 @@ export function ProgressDashboard({ averagePercent, earnedMarks, availableMarks,
   }, [attemptHistory]);
 
   const launchQuestion = (question: Question) => {
-    localStorage.setItem('aqaPhysicsSelectedQuestion', question.id);
-    localStorage.setItem('aqaPhysicsDraftAnswer', '');
+    localStorage.setItem('aqaGcseScienceSelectedQuestion', question.id);
+    localStorage.setItem('aqaGcseScienceDraftAnswer', '');
     window.location.reload();
   };
 
@@ -153,7 +153,7 @@ export function ProgressDashboard({ averagePercent, earnedMarks, availableMarks,
       </div>
 
       <div className="rounded-xl border bg-white p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-2"><div><div className="flex items-center gap-2"><BookOpenCheck size={20} /><h2 className="text-xl font-bold">AQA specification coverage map</h2></div><p className="mt-1 text-sm text-gray-500">See what you have actually practised and jump straight into weak or untouched specification areas.</p></div><Badge variant="outline">{coverage.filter(point => point.attempted).length}/{coverage.length} areas attempted</Badge></div>
+        <div className="flex flex-wrap items-center justify-between gap-2"><div><div className="flex items-center gap-2"><BookOpenCheck size={20} /><h2 className="text-xl font-bold">AQA GCSE Science specification coverage map</h2></div><p className="mt-1 text-sm text-gray-500">See what you have actually practised and jump straight into weak or untouched specification areas.</p></div><Badge variant="outline">{coverage.filter(point => point.attempted).length}/{coverage.length} areas attempted</Badge></div>
         <div className="mt-5 space-y-6">
           {sections.map(section => <div key={section}><h3 className="mb-2 font-bold">{section}</h3><div className="grid gap-2 md:grid-cols-2">{coverage.filter(point => point.section === section).map(point => {
             const target = point.matched.find(question => !savedResults[question.id]) || point.matched[0];
