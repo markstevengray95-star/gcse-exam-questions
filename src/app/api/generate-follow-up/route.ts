@@ -114,7 +114,7 @@ export async function POST(req: NextRequest) {
     }
 
     const focus = focusFrom(body);
-    const key = String(body?.apiKey || process.env.GEMINI_API_KEY || '');
+    const key = String(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '');
     if (!key) return NextResponse.json({ question: fallbackQuestion(current, focus), fallbackUsed: true });
 
     const prompt = `Create ONE new, original AQA GCSE Science practice question that directly targets a weakness from a student's previous attempt.
