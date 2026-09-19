@@ -2,6 +2,7 @@ import { specCoverageQuestions, specificationCoverageAudit } from './specCoverag
 import { expandedQuestionBank } from './expandedQuestionBank';
 import { recurringExamQuestionBank } from './recurringExamQuestionBank';
 import { practicalAndCoreExpansion, practicalExpansionAudit } from './practicalAndCoreExpansion';
+import { sourceQuestionBank, sourceQuestionBankAudit } from './sourceQuestionBank';
 import type { Question } from './questionTypes';
 export type { Question } from './questionTypes';
 
@@ -151,6 +152,7 @@ export const questions: Question[] = [
   ...expandedQuestionBank,
   ...recurringExamQuestionBank,
   ...practicalAndCoreExpansion,
+  ...sourceQuestionBank,
 ];
 
 function auditQuestionBank(bank: Question[]) {
@@ -178,6 +180,7 @@ function auditQuestionBank(bank: Question[]) {
     practicals: bank.filter(question => question.topic.toLowerCase().includes('required practical')).length,
     recurringExamStyle: recurringExamQuestionBank.length,
     practicalExpansion: practicalExpansionAudit,
+    uploadedQuestionBank: sourceQuestionBankAudit,
   };
 }
 
