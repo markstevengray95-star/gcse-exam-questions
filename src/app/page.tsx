@@ -35,7 +35,7 @@ import {
   type FollowUpQuestion,
   type StudentConfidence,
 } from '@/components/PracticeEnhancements';
-import { BookOpen, Clock3, KeyRound, RotateCcw, ShieldCheck } from 'lucide-react';
+import { BookOpen, Clock3, RotateCcw, ShieldCheck } from 'lucide-react';
 import { InlineMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 
@@ -124,7 +124,7 @@ export default function Home() {
   const [markingError, setMarkingError] = useState('');
   const [strictness, setStrictness] = useState('standard');
   const [provider, setProvider] = useState('online');
-  const [apiKey, setApiKey] = useState('');
+  const apiKey = '';
   const [activeTab, setActiveTab] = useState<ActiveTab>('practice');
   const [isDataSheetOpen, setIsDataSheetOpen] = useState(false);
   const [subjectFilter, setSubjectFilter] = useState('all');
@@ -241,15 +241,6 @@ export default function Home() {
     }
   }, [answer, selectedQuestionId, historyLoaded, isGeneratedQuestion]);
 
-  useEffect(() => {
-    try {
-      const sessionKey = sessionStorage.getItem('aqaGcseScienceApiKey');
-      if (sessionKey) setApiKey(sessionKey);
-      localStorage.removeItem('aqaGcseScienceApiKey');
-    } catch {
-      // Session storage is optional; the server environment key can still be used.
-    }
-  }, []);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
@@ -384,7 +375,7 @@ export default function Home() {
       const response = await fetch('/api/generate-follow-up', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: currentQuestion, feedback: result, apiKey }),
+        body: JSON.stringify({ question: currentQuestion, feedback: result }),
       });
       const data = await response.json();
       if (!response.ok || data?.error || !data?.question) throw new Error(data?.error || 'Could not build a follow-up question.');
@@ -423,7 +414,6 @@ export default function Home() {
           modelAnswer: currentQuestion.modelAnswer,
           strictness,
           provider,
-          apiKey,
         }),
       });
       const data = await response.json();
@@ -432,7 +422,7 @@ export default function Home() {
         throw new Error('The marker returned an incomplete result. Please try again.');
       }
       if (answerImage && data?.fallbackUsed) {
-        throw new Error('The AI service was unavailable, so the image could not be read. Add a Gemini key or try again when AI marking is available.');
+        throw new Error('The AI service was unavailable, so the image could not be read. The server AI connection is unavailable. Try again later or use typed-answer offline marking.');
       }
 
       const result = data as AnalysisResult;
@@ -531,25 +521,8 @@ export default function Home() {
           </div>
 
           <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
-            <div className="flex items-center gap-2 rounded-md border border-gray-700 bg-gray-900 px-2 py-1" title="The key is stored only for this browser session.">
-              <KeyRound size={14} className="text-gray-400" />
-              <input
-                type="password"
-                placeholder="Optional Gemini key"
-                className="w-36 bg-transparent text-xs text-white outline-none placeholder:text-gray-500 md:w-44"
-                value={apiKey}
-                onChange={event => {
-                  const value = event.target.value;
-                  setApiKey(value);
-                  try {
-                    if (value) sessionStorage.setItem('aqaGcseScienceApiKey', value);
-                    else sessionStorage.removeItem('aqaGcseScienceApiKey');
-                  } catch {
-                    // Optional convenience only.
-                  }
-                }}
-                aria-label="Gemini API key for this session"
-              />
+            <div className="flex items-center rounded-md border border-emerald-700/70 bg-emerald-950/40 px-3 py-1 text-xs font-semibold text-emerald-200" title="AI credentials are configured on the server, never in the browser.">
+              Server AI
             </div>
 
             <div className="flex rounded-md bg-gray-900 p-1 text-xs font-semibold">
