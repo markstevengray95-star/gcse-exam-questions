@@ -23,6 +23,8 @@ import { AccessibilityMenu } from '@/components/AccessibilityMenu';
 import { DiagramAnswerPad } from '@/components/DiagramAnswerPad';
 import { MarkReviewTools } from '@/components/MarkReviewTools';
 import { PartialMarkExamples } from '@/components/PartialMarkExamples';
+import { ExaminerTraining } from '@/components/ExaminerTraining';
+import { ExamTechniqueCoach } from '@/components/ExamTechniqueCoach';
 import {
   AttemptHistoryPanel,
   ConfidenceCalibration,
@@ -41,7 +43,7 @@ import 'katex/dist/katex.min.css';
 
 type PracticeResult = { marks: number; total: number };
 type PracticeResults = Record<string, PracticeResult>;
-type ActiveTab = 'practice' | 'learn' | 'custom' | 'whole' | 'dashboard' | 'teacher';
+type ActiveTab = 'practice' | 'examiner' | 'learn' | 'custom' | 'whole' | 'dashboard' | 'teacher';
 
 function topicScores(allQuestions: Question[], results: PracticeResults) {
   return Array.from(new Set(allQuestions.map(question => question.topic)))
@@ -529,7 +531,7 @@ export default function Home() {
               <button onClick={() => setProvider('offline')} className={`rounded px-2 py-1 ${provider === 'offline' ? 'bg-amber-600 text-white' : 'text-gray-400'}`}>Offline</button>
             </div>
 
-            {(['practice', 'learn', 'custom', 'whole', 'dashboard', 'teacher'] as const).map(tab => (
+            {(['practice', 'examiner', 'learn', 'custom', 'whole', 'dashboard', 'teacher'] as const).map(tab => (
               <button
                 key={tab}
                 className={`whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold transition ${activeTab === tab ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
@@ -538,7 +540,7 @@ export default function Home() {
                   setMarkingError('');
                 }}
               >
-                {tab === 'practice' ? 'Practice' : tab === 'learn' ? 'Learning Hub' : tab === 'custom' ? 'Custom Marker' : tab === 'whole' ? 'Whole Exam' : tab === 'teacher' ? 'Teacher' : 'Dashboard'}
+                {tab === 'practice' ? 'Practice' : tab === 'examiner' ? 'Examiner Mode' : tab === 'learn' ? 'Learning Hub' : tab === 'custom' ? 'Custom Marker' : tab === 'whole' ? 'Whole Exam' : tab === 'teacher' ? 'Teacher' : 'Dashboard'}
               </button>
             ))}
 
@@ -780,6 +782,13 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {activeTab === 'examiner' ? (
+          <div className="space-y-8">
+            <ExaminerTraining onPracticeQuestion={id => { setActiveTab('practice'); selectBankQuestion(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+            <ExamTechniqueCoach />
+          </div>
+        ) : null}
 
         {activeTab === 'learn' ? <LearningHub onPracticeQuestion={id => { setActiveTab('practice'); selectBankQuestion(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} /> : null}
         {activeTab === 'custom' ? <CustomMarker onFeedbackReceived={setFeedback} /> : null}
