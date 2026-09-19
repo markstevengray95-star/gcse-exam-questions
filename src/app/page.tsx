@@ -276,7 +276,7 @@ export default function Home() {
     resetQuestionState();
   };
 
-  const useGeneratedQuestion = (question: GeneratedQuestion) => {
+  const selectGeneratedQuestion = (question: GeneratedQuestion) => {
     setGeneratedQuestion(question);
     setSelectedQuestionId(question.id);
     resetQuestionState();
@@ -473,7 +473,7 @@ export default function Home() {
 
   const practiceFollowUp = (question: FollowUpQuestion) => {
     setActiveTab('practice');
-    useGeneratedQuestion(question);
+    selectGeneratedQuestion(question);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -550,7 +550,7 @@ export default function Home() {
         {activeTab === 'practice' && (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="flex flex-col gap-6 lg:col-span-2">
-              <QuestionGenerator onUse={useGeneratedQuestion} />
+              <QuestionGenerator onUse={selectGeneratedQuestion} />
 
               <div className="flex justify-end">
                 <Button variant="outline" size="sm" onClick={clearPracticeHistory}>Reset saved progress</Button>
