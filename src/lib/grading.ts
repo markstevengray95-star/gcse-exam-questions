@@ -1,17 +1,20 @@
-export type IndicativeGrade = 'A*' | 'A' | 'B' | 'C' | 'D' | 'E' | 'U';
+export type IndicativeGrade = '9' | '8' | '7' | '6' | '5' | '4' | '3' | '2' | '1' | 'U';
 
 export const PRACTICE_GRADE_BOUNDARIES: ReadonlyArray<{ grade: IndicativeGrade; minPercent: number }> = [
-  { grade: 'A*', minPercent: 80 },
-  { grade: 'A', minPercent: 70 },
-  { grade: 'B', minPercent: 60 },
-  { grade: 'C', minPercent: 50 },
-  { grade: 'D', minPercent: 40 },
-  { grade: 'E', minPercent: 30 },
+  { grade: '9', minPercent: 80 },
+  { grade: '8', minPercent: 73 },
+  { grade: '7', minPercent: 66 },
+  { grade: '6', minPercent: 58 },
+  { grade: '5', minPercent: 50 },
+  { grade: '4', minPercent: 42 },
+  { grade: '3', minPercent: 34 },
+  { grade: '2', minPercent: 26 },
+  { grade: '1', minPercent: 18 },
   { grade: 'U', minPercent: 0 },
 ];
 
 export const PRACTICE_GRADE_NOTICE =
-  'Practice bands are revision indicators only. Official AQA grade boundaries vary by exam series and paper.';
+  'Practice bands are revision indicators only, not official predicted grades. AQA grade boundaries vary by exam series, paper, tier and qualification.';
 
 export function clampPercent(value: number) {
   if (!Number.isFinite(value)) return 0;
