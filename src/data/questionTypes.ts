@@ -23,4 +23,7 @@ export interface Question {
   modelAnswer: string;
   pag?: string;
   specificationPointId?: string;
+  bankSource?: 'Biology question bank' | 'Chemistry question bank' | 'Physics question bank';
+  bankReference?: string;
+  sourcePartialMark?: { awarded: number; total: number };
 }
