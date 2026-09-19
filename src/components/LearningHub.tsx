@@ -226,8 +226,18 @@ export function LearningHub({
   };
 
   const launchAdaptive = () => {
-    const unattempted = adaptivePool.filter(q => !results[q.id]);
-    const pool = unattempted.length ? unattempted : adaptivePool;
+    const priorityTopic = weakTopics[0];
+    const topicPool = priorityTopic ? adaptivePool.filter(q => q.topic === priorityTopic.topic) : adaptivePool;
+    const basePool = topicPool.length ? topicPool : adaptivePool;
+    const targetDifficulty = !priorityTopic?.attempted || priorityTopic.percent < 50
+      ? 'Easy'
+      : priorityTopic.percent < 70
+        ? 'Medium'
+        : 'Hard';
+    const difficultyPool = basePool.filter(q => q.difficulty === targetDifficulty);
+    const preferred = difficultyPool.length ? difficultyPool : basePool;
+    const unattempted = preferred.filter(q => !results[q.id]);
+    const pool = unattempted.length ? unattempted : preferred;
     launch(pool[Math.floor(Math.random() * pool.length)]);
   };
 
