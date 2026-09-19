@@ -72,7 +72,7 @@ export function DataSheetDrawer({ isOpen, onClose }: { isOpen: boolean; onClose:
         <GripHorizontal size={18} className="shrink-0 text-slate-400" />
         <BookOpen size={18} className="shrink-0 text-blue-300" />
         <div className="min-w-0 flex-1">
-          <div className="font-bold">Interactive A-level Physics equation sheet</div>
+          <div className="font-bold">Interactive GCSE Science equation & maths guide</div>
           <div className="text-[11px] text-slate-400">Click any formula for a plain-English breakdown · {equationGuideCount} equations</div>
         </div>
         <button type="button" className="rounded-lg p-1.5 hover:bg-white/10" title="Reset position" onPointerDown={event => event.stopPropagation()} onClick={() => setPosition({ x: 24, y: 88 })}><RotateCcw size={16} /></button>
@@ -147,7 +147,7 @@ export function DataSheetDrawer({ isOpen, onClose }: { isOpen: boolean; onClose:
 
               <div className="relative mb-4">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search equations, e.g. capacitor, momentum, power..." className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100" />
+                <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search equations, e.g. magnification, moles, force, power..." className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100" />
               </div>
 
               <div className="space-y-5">
