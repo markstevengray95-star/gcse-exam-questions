@@ -99,6 +99,7 @@ export function TeacherDashboard() {
   const [questionCount, setQuestionCount] = useState(10);
   const [deadline, setDeadline] = useState('');
   const [copyStatus, setCopyStatus] = useState('');
+  const [snapshotCode, setSnapshotCode] = useState('');
 
   useEffect(() => {
     setStudents(safeLoad(STUDENTS_KEY, []));
@@ -122,6 +123,36 @@ export function TeacherDashboard() {
   useEffect(() => {
     if (topic !== 'All' && !topics.includes(topic)) setTopic('All');
   }, [topic, topics]);
+
+  const decodePayload = (code: string) => {
+    const normalised = code.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalised + '='.repeat((4 - normalised.length % 4) % 4);
+    const binary = atob(padded);
+    const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  };
+
+  const importSnapshot = () => {
+    try {
+      const payload = decodePayload(snapshotCode.trim()) as Partial<StudentSnapshot> & { type?: string };
+      if (payload.type !== 'gcse-progress-v1' || !payload.name) throw new Error('Not a GCSE Science progress snapshot');
+      const student: StudentSnapshot = {
+        id: `student-${Date.now()}`,
+        name: String(payload.name),
+        biology: Math.min(100, Math.max(0, Number(payload.biology) || 0)),
+        chemistry: Math.min(100, Math.max(0, Number(payload.chemistry) || 0)),
+        physics: Math.min(100, Math.max(0, Number(payload.physics) || 0)),
+        completed: Math.max(0, Number(payload.completed) || 0),
+        weakTopic: String(payload.weakTopic || 'Not recorded'),
+      };
+      saveStudents([...students.filter(item => item.name.toLowerCase() !== student.name.toLowerCase()), student]);
+      setSnapshotCode('');
+      setCopyStatus(`${student.name}'s progress imported`);
+      window.setTimeout(() => setCopyStatus(''), 1800);
+    } catch {
+      setCopyStatus('That progress snapshot could not be read.');
+    }
+  };
 
   const addStudent = () => {
     if (!studentName.trim()) return;
@@ -230,6 +261,7 @@ export function TeacherDashboard() {
               <Button size="sm" onClick={() => copy(assignmentCode, 'Code')}><ClipboardCopy size={14} /> Copy code</Button>
               <Button size="sm" variant="outline" onClick={() => copy(shareUrl, 'Link')}><Link2 size={14} /> Copy assignment link</Button>
               <Button size="sm" variant="outline" onClick={saveAssignment}>Save assignment</Button>
+              <Button size="sm" variant="outline" onClick={() => window.open(`https://classroom.google.com/share?url=${encodeURIComponent(shareUrl)}`, '_blank', 'noopener,noreferrer')}>Google Classroom</Button>
             </div>
             {copyStatus ? <div className="mt-2 text-xs text-emerald-700">{copyStatus}</div> : null}
           </div>
@@ -238,6 +270,13 @@ export function TeacherDashboard() {
         <div className="rounded-xl border bg-white p-5 shadow-sm">
           <div className="flex items-center gap-2"><Users size={19} /><h3 className="text-lg font-bold">Add student progress snapshot</h3></div>
           <p className="mt-1 text-xs text-gray-500">Useful for a quick class overview without requiring student accounts. Enter exported/latest percentages from each student.</p>
+          <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+            <div className="text-sm font-semibold text-blue-950">Import directly from a student's Learning Hub</div>
+            <div className="mt-2 flex gap-2">
+              <input value={snapshotCode} onChange={event => setSnapshotCode(event.target.value)} placeholder="Paste progress snapshot" className="min-w-0 flex-1 rounded border bg-white p-2 text-xs" />
+              <Button size="sm" onClick={importSnapshot} disabled={!snapshotCode.trim()}>Import</Button>
+            </div>
+          </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="text-sm font-medium sm:col-span-2">Student name<input value={studentName} onChange={e => setStudentName(e.target.value)} className="mt-1 w-full rounded border p-2" /></label>
             <label className="text-sm font-medium">Biology %<input type="number" min={0} max={100} value={biology} onChange={e => setBiology(Number(e.target.value) || 0)} className="mt-1 w-full rounded border p-2" /></label>
