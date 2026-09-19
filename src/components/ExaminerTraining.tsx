@@ -136,7 +136,7 @@ export function ExaminerTraining() {
     setTrainingError('');
     setTrainingResult(null);
     let apiKey = '';
-    try { apiKey = sessionStorage.getItem('aqaPhysicsApiKey') || ''; } catch { apiKey = ''; }
+    try { apiKey = sessionStorage.getItem('aqaGcseScienceApiKey') || ''; } catch { apiKey = ''; }
 
     try {
       const response = await fetch('/api/analyze', {
@@ -171,8 +171,8 @@ export function ExaminerTraining() {
 
   const practiseQuestion = () => {
     if (!trainingQuestion) return;
-    localStorage.setItem('aqaPhysicsSelectedQuestion', trainingQuestion.id);
-    localStorage.setItem('aqaPhysicsDraftAnswer', '');
+    localStorage.setItem('aqaGcseScienceSelectedQuestion', trainingQuestion.id);
+    localStorage.setItem('aqaGcseScienceDraftAnswer', '');
     window.location.reload();
   };
 
