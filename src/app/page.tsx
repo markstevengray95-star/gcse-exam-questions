@@ -520,8 +520,8 @@ export default function Home() {
           </div>
 
           <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
-            <div className="flex items-center rounded-md border border-emerald-700/70 bg-emerald-950/40 px-3 py-1 text-xs font-semibold text-emerald-200" title="AI credentials are configured on the server, never in the browser.">
-              Server AI
+            <div className="flex items-center rounded-md border border-slate-600 bg-slate-900 px-3 py-1 text-xs font-semibold text-slate-200" title="AI credentials are read securely from the server environment when configured.">
+              Server AI mode
             </div>
 
             <div className="flex rounded-md bg-gray-900 p-1 text-xs font-semibold">
