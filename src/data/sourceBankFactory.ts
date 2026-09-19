@@ -8,7 +8,7 @@ export type SourceBankSeed = {
   targetMark: number | null;
   partialAwarded: number | null;
   partialTotal: number | null;
-  focus: string[];
+  focus?: string[];
 };
 
 type CalculationVariant = {
@@ -111,7 +111,25 @@ const calculationVariants: Record<string, CalculationVariant> = {
 };
 
 function topicFromChapter(chapter: string) {
-  return chapter.replace(/^(Biology|Chemistry|Physics)\s+\d+\.\d+\s+/, '').trim();
+  const match = chapter.match(/^(Biology|Chemistry|Physics)\s+4\.(\d+)/);
+  const subject = match?.[1];
+  const section = Number(match?.[2] || 0);
+  const canonical: Record<string, Record<number, string>> = {
+    Biology: {
+      1: 'Cell biology', 2: 'Organisation', 3: 'Infection and response', 4: 'Bioenergetics',
+      5: 'Homeostasis and response', 6: 'Inheritance, variation and evolution', 7: 'Ecology',
+    },
+    Chemistry: {
+      1: 'Atomic structure and the periodic table', 2: 'Bonding, structure and properties', 3: 'Quantitative chemistry',
+      4: 'Chemical changes', 5: 'Energy changes', 6: 'Rate and extent of chemical change', 7: 'Organic chemistry',
+      8: 'Chemical analysis', 9: 'Chemistry of the atmosphere', 10: 'Using resources',
+    },
+    Physics: {
+      1: 'Energy', 2: 'Electricity', 3: 'Particle model of matter', 4: 'Atomic structure',
+      5: 'Forces', 6: 'Waves', 7: 'Magnetism and electromagnetism', 8: 'Space physics',
+    },
+  };
+  return canonical[subject || '']?.[section] || chapter.replace(/^(Biology|Chemistry|Physics)\s+\d+\.\d+\s+/, '').trim();
 }
 
 function paperFor(subject: string, chapter: string): 'Paper 1' | 'Paper 2' {
@@ -151,7 +169,10 @@ function commandDefinition(command: string) {
 
 function cleanFocus(seed: SourceBankSeed) {
   const generic = new Set(['changes','global','model','models','effect','different','number','value','values','result','results','student','answer']);
-  return seed.focus.filter(word => !generic.has(word.toLowerCase())).slice(0, 7);
+  const supplied = seed.focus?.length
+    ? seed.focus
+    : seed.title.toLowerCase().split(/[^a-z0-9]+/).filter(word => word.length > 3);
+  return supplied.filter(word => !generic.has(word.toLowerCase())).slice(0, 7);
 }
 
 function genericPrompt(seed: SourceBankSeed, command: string, focus: string[]) {
