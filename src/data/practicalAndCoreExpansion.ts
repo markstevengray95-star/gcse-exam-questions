@@ -28,6 +28,44 @@ type TheorySeed = {
   points: string[];
 };
 
+const practicalCommandWords: Record<string, string> = {
+  "rp-bio-01": "Describe",
+  "rp-bio-02": "Design",
+  "rp-bio-03": "Plan",
+  "rp-bio-04": "Describe",
+  "rp-bio-05": "Plan",
+  "rp-bio-06": "Plan",
+  "rp-bio-07": "Design",
+  "rp-bio-08": "Plan",
+  "rp-bio-09": "Describe",
+  "rp-bio-10": "Plan",
+  "rp-chem-01": "Describe",
+  "rp-chem-02": "Evaluate",
+  "rp-chem-03": "Design",
+  "rp-chem-04": "Plan",
+  "rp-chem-05": "Plan",
+  "rp-chem-06": "Describe",
+  "rp-chem-07": "Design",
+  "rp-chem-08": "Describe",
+  "rp-phys-01": "Plan",
+  "rp-phys-02": "Evaluate",
+  "rp-phys-03": "Plan",
+  "rp-phys-04": "Describe",
+  "rp-phys-05": "Describe",
+  "rp-phys-06": "Plan",
+  "rp-phys-07": "Plan",
+  "rp-phys-08": "Plan",
+  "rp-phys-09": "Describe",
+  "rp-phys-10": "Design"
+};
+
+const practicalCommandDefinitions: Record<string, string> = {
+  Plan: 'Write a method.',
+  Design: 'Set out how something will be done.',
+  Describe: 'Give an accurate account of a method or process.',
+  Evaluate: 'Use the information supplied and scientific knowledge to consider strengths and limitations and make a judgement.',
+};
+
 const practicalSeeds: PracticalSeed[] = [
   {
     "id": "rp-bio-01",
@@ -36,7 +74,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Microscopy",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "A student uses a light microscope to observe onion cells. Describe and evaluate a method that would produce an accurate labelled biological drawing with a magnification scale.",
+    "prompt": "A student has prepared a slide of onion tissue. Describe a method the student could use to obtain a clear microscope image, produce a scientific drawing and determine magnification.",
     "points": [
       "Prepare a thin specimen on a slide and add a suitable stain before placing a coverslip carefully.",
       "Start with the lowest-power objective, focus clearly, then increase magnification if needed.",
@@ -53,7 +91,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Antiseptics and antibiotics on bacterial growth",
     "year": "Year 10",
     "course": "Separate only",
-    "prompt": "Plan and evaluate an investigation comparing the effect of different antiseptics on bacterial growth using agar plates.",
+    "prompt": "A student wants to compare the effectiveness of several antiseptics on the growth of one bacterial culture. Design an investigation that would produce valid and repeatable results.",
     "points": [
       "Use aseptic technique and sterile equipment so unwanted microorganisms do not contaminate the plates.",
       "Spread the same bacterial culture evenly and use equal-sized paper discs with measured volumes or concentrations of antiseptic.",
@@ -70,7 +108,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Osmosis in plant tissue",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "Plan an investigation into how sugar-solution concentration affects the mass of potato cylinders and explain how the results should be analysed.",
+    "prompt": "Plan an investigation to determine how the concentration of a sugar solution affects the percentage change in mass of potato cylinders.",
     "points": [
       "Cut potato cylinders to the same dimensions and measure their initial masses using the same balance.",
       "Place them in a suitable range of known sugar concentrations using equal solution volumes.",
@@ -87,7 +125,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Food tests",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "A student is given an unknown food sample. Describe a method to test it for reducing sugars, starch and protein, and explain how reliable conclusions can be obtained.",
+    "prompt": "A student is given several unknown food samples. Describe a method to test each sample for reducing sugars, starch and protein. Include the positive result for each test and how cross-contamination would be reduced.",
     "points": [
       "Prepare a food solution or suspension using clean apparatus and separate samples for each test.",
       "For reducing sugar add Benedict’s reagent and heat in a hot-water bath; a positive result changes from blue through green/yellow/orange to brick red.",
@@ -104,7 +142,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Effect of pH on amylase",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation of the effect of pH on the rate at which amylase breaks down starch.",
+    "prompt": "Plan an investigation to determine the optimum pH for amylase breaking down starch. Your method should allow a rate to be calculated.",
     "points": [
       "Use buffer solutions to set a range of pH values and keep amylase, starch volumes and concentrations constant.",
       "Keep temperature constant with a water bath or electric heater and allow solutions to reach that temperature.",
@@ -121,7 +159,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Light intensity and photosynthesis",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "Plan an investigation into how light intensity affects the rate of photosynthesis in pondweed and explain how to improve the quality of the data.",
+    "prompt": "A student makes the hypothesis that increasing light intensity increases the rate of photosynthesis in pondweed. Plan an investigation to test this hypothesis and explain how the data should be processed.",
     "points": [
       "Place pondweed in water with a controlled carbon-dioxide supply and vary lamp distance or measured light intensity.",
       "Measure photosynthesis by counting bubbles over a fixed time or, preferably, collecting oxygen volume.",
@@ -138,7 +176,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Human reaction time",
     "year": "Year 11",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation into the effect of one factor on human reaction time.",
+    "prompt": "Design an investigation to test whether distraction affects human reaction time. Explain how the student could reduce the effect of random variation.",
     "points": [
       "Choose a clearly defined factor such as distraction and state a testable hypothesis.",
       "Use a standardised reaction-time method such as ruler drop, keeping drop height/start position and instructions consistent.",
@@ -155,7 +193,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Seedling responses to light or gravity",
     "year": "Year 11",
     "course": "Separate only",
-    "prompt": "Plan and evaluate an investigation into the effect of light direction on the growth of newly germinated seedlings.",
+    "prompt": "Plan an investigation to test the effect of the direction of light on the growth response of newly germinated seedlings.",
     "points": [
       "Use similar newly germinated seedlings and expose groups to a controlled directional light treatment plus a suitable control.",
       "Keep temperature, water supply, growth time, species and starting seedling size as similar as possible.",
@@ -172,7 +210,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Ecological sampling",
     "year": "Year 11",
     "course": "Both",
-    "prompt": "Plan and evaluate a field investigation of how an abiotic factor affects the distribution of a plant species.",
+    "prompt": "Describe a method to investigate how an abiotic factor changes the distribution of a plant species across a habitat. Include how the results should be analysed.",
     "points": [
       "Choose an abiotic factor such as light intensity or soil moisture and form a testable hypothesis.",
       "Use a transect with quadrats placed at regular intervals, or random quadrats where abundance rather than a gradient is investigated.",
@@ -189,7 +227,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Temperature and decay of milk",
     "year": "Year 11",
     "course": "Separate only",
-    "prompt": "Plan and evaluate an investigation into how temperature affects the rate of decay of fresh milk using pH change.",
+    "prompt": "Plan an investigation to determine how temperature affects the rate of decay of fresh milk by measuring change in pH.",
     "points": [
       "Place equal volumes of the same fresh milk into containers held at a range of controlled temperatures.",
       "Measure initial pH with the same calibrated method and record pH at regular equal time intervals.",
@@ -206,7 +244,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Preparation of a soluble salt",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "Describe and evaluate a method to prepare pure, dry copper sulfate crystals from copper oxide and dilute sulfuric acid.",
+    "prompt": "A student needs to prepare a pure, dry sample of copper sulfate crystals from dilute sulfuric acid and copper oxide. Describe a method and give a reason for each key stage.",
     "points": [
       "Warm dilute sulfuric acid gently and add copper oxide in small portions with stirring.",
       "Continue adding copper oxide until some remains unreacted so all acid has been neutralised.",
@@ -223,7 +261,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Acid–alkali titration",
     "year": "Year 10",
     "course": "Separate only",
-    "prompt": "Describe and evaluate a method for determining accurately the volume of sodium hydroxide solution needed to neutralise a measured volume of hydrochloric acid by titration.",
+    "prompt": "A student carries out an acid–alkali titration but the first titres are not concordant. Evaluate the method and describe how the student should obtain an accurate mean titre.",
     "points": [
       "Use a pipette to transfer a fixed accurate volume of acid to a conical flask and add a few drops of suitable indicator.",
       "Rinse and fill a burette with sodium hydroxide, remove air bubbles and record the initial reading at eye level.",
@@ -240,7 +278,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Electrolysis of aqueous solutions",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation of the products formed when an aqueous ionic solution is electrolysed using inert electrodes.",
+    "prompt": "Design an investigation to test a hypothesis about the products formed when an aqueous ionic solution is electrolysed using inert electrodes.",
     "points": [
       "Set up inert electrodes in the chosen aqueous solution connected safely to a direct-current supply.",
       "State a hypothesis for which products will form at the cathode and anode based on the ions present.",
@@ -257,7 +295,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Temperature changes in reactions",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation into how one variable affects the temperature change in a reacting solution.",
+    "prompt": "Plan an investigation into how one chosen variable affects the temperature change of a reaction in solution. Explain how heat loss should be reduced.",
     "points": [
       "Choose a defined independent variable such as concentration or reactant mass and measure reactant quantities accurately.",
       "Use an insulated cup with a lid where possible and measure the initial temperature before mixing.",
@@ -274,7 +312,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Concentration and rate of reaction",
     "year": "Year 11",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation into how reactant concentration affects reaction rate using either gas production or a colour/turbidity change.",
+    "prompt": "A student claims that increasing concentration increases reaction rate. Plan an investigation to test this claim using either gas production or a colour/turbidity change.",
     "points": [
       "Prepare a suitable range of concentrations while keeping the amount of the other reactant controlled.",
       "Measure rate using gas volume against time or a standardised colour/turbidity end point and start timing consistently.",
@@ -291,7 +329,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Paper chromatography",
     "year": "Year 11",
     "course": "Both",
-    "prompt": "Describe and evaluate a paper chromatography method used to separate and compare coloured substances, including how Rf values are obtained.",
+    "prompt": "Describe a method using paper chromatography to separate coloured substances and explain how Rf values would be calculated and compared.",
     "points": [
       "Draw a pencil baseline and place small concentrated spots of samples on the line.",
       "Stand the paper in solvent with the solvent level below the baseline and keep the container covered where appropriate.",
@@ -308,7 +346,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Tests for ions",
     "year": "Year 11",
     "course": "Separate only",
-    "prompt": "A student is given an unknown ionic compound. Describe a systematic practical strategy to identify its positive and negative ions and evaluate how reliable identification can be achieved.",
+    "prompt": "A student is given an unknown single ionic compound. Design a sequence of chemical tests that could identify the positive and negative ions reliably.",
     "points": [
       "Use a clean sample and perform an appropriate flame test or hydroxide test for possible positive ions.",
       "Use acidified silver nitrate to test for halide ions, interpreting precipitate colours correctly.",
@@ -325,7 +363,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Analysis and purification of water",
     "year": "Year 11",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation comparing water samples and producing a purified sample by distillation.",
+    "prompt": "Describe how a student could compare water samples for pH and dissolved solids, then obtain a purified sample of water by distillation.",
     "points": [
       "Measure pH of each water sample using a consistent calibrated method.",
       "Measure dissolved solids by evaporating a known volume and determining the mass of residue, or another suitable quantitative method.",
@@ -342,7 +380,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Specific heat capacity",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation to determine the specific heat capacity of a metal block.",
+    "prompt": "Plan an experiment to determine the specific heat capacity of a metal block using electrical heating. Include the measurements and calculation required.",
     "points": [
       "Measure the block mass and insert a heater and thermometer/temperature probe with good thermal contact.",
       "Measure initial temperature, potential difference and current, then heat for a measured time.",
@@ -359,7 +397,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Thermal insulation",
     "year": "Year 10",
     "course": "Separate only",
-    "prompt": "Plan and evaluate an investigation comparing the effectiveness of different materials as thermal insulators.",
+    "prompt": "A student compares materials used as thermal insulation by measuring how quickly hot water cools. Evaluate the investigation and describe improvements that would make the comparison more valid and precise.",
     "points": [
       "Use identical containers with equal volumes/masses of water at the same starting temperature.",
       "Wrap each container with the same thickness or controlled amount of a different insulating material.",
@@ -376,7 +414,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Factors affecting resistance",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation into how the length of a wire affects its electrical resistance.",
+    "prompt": "Plan an investigation to determine how the length of a wire affects its electrical resistance.",
     "points": [
       "Set up a circuit with the test wire, ammeter in series and voltmeter across the measured wire length.",
       "Change wire length systematically while keeping material and cross-sectional area constant.",
@@ -393,7 +431,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "I–V characteristics",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "Describe and evaluate a method for obtaining the current–potential-difference characteristics of a resistor, filament lamp and diode.",
+    "prompt": "Describe a method for obtaining current–potential difference characteristics for a fixed resistor, a filament lamp and a diode.",
     "points": [
       "Construct a circuit with an ammeter in series and voltmeter across the component, using a variable supply or variable resistor.",
       "Change potential difference in steps and record corresponding current for each component.",
@@ -410,7 +448,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Density of solids and liquids",
     "year": "Year 10",
     "course": "Both",
-    "prompt": "Describe and evaluate methods for determining the density of a regular solid, an irregular solid and a liquid.",
+    "prompt": "Describe methods for determining the density of a regular solid, an irregular solid and a liquid. Include how measurement uncertainty could be reduced.",
     "points": [
       "Measure mass with a balance for each sample.",
       "For a regular solid measure dimensions with suitable apparatus and calculate volume geometrically.",
@@ -427,7 +465,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Force and extension",
     "year": "Year 11",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation into the relationship between force and extension of a spring.",
+    "prompt": "Plan an investigation to determine the relationship between force and extension for a spring and identify the limit of proportionality.",
     "points": [
       "Measure the spring’s original length and add known loads in steps, converting mass to force where necessary.",
       "Measure new length at each force and calculate extension = new length − original length.",
@@ -444,7 +482,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Force, mass and acceleration",
     "year": "Year 11",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation of how resultant force affects the acceleration of a trolley of constant mass.",
+    "prompt": "Plan an investigation to determine how resultant force affects the acceleration of an object when the total moving mass is kept constant.",
     "points": [
       "Use a trolley on a low-friction track with a method such as a hanging mass to provide a measured driving force.",
       "Keep total moving mass constant while changing the distribution of mass to vary the driving force.",
@@ -461,7 +499,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Wave speed, frequency and wavelength",
     "year": "Year 11",
     "course": "Both",
-    "prompt": "Plan and evaluate measurements of wavelength, frequency and wave speed using a ripple tank or waves on a string.",
+    "prompt": "Plan an investigation to determine wave speed from measurements of frequency and wavelength. Explain how percentage uncertainty in wavelength could be reduced.",
     "points": [
       "Generate steady waves at a measured or known frequency and allow a clear regular pattern to form.",
       "Measure several wavelengths across multiple wavefront spacings, then divide to reduce percentage uncertainty.",
@@ -478,7 +516,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Reflection and refraction of light",
     "year": "Year 11",
     "course": "Separate only",
-    "prompt": "Plan and evaluate an investigation of reflection and refraction of light using a ray box and transparent block.",
+    "prompt": "A student investigates reflection and refraction using a ray box and transparent block. Describe a method that would produce accurate angle measurements over a suitable range.",
     "points": [
       "Draw a normal at the point where a narrow light ray meets the surface and mark the incident/reflected or refracted rays.",
       "Measure angles from the normal using a protractor, not from the surface.",
@@ -495,7 +533,7 @@ const practicalSeeds: PracticalSeed[] = [
     "title": "Infrared absorption and radiation",
     "year": "Year 11",
     "course": "Both",
-    "prompt": "Plan and evaluate an investigation into how surface finish affects the absorption or emission of infrared radiation.",
+    "prompt": "Design an investigation to compare how different surface finishes absorb or emit infrared radiation. Explain how the student would make the comparison fair.",
     "points": [
       "Use identical containers or surfaces that differ only in colour/finish, such as matt black and shiny metal.",
       "For emission, fill with equal amounts of hot water at the same starting temperature; for absorption expose equally to the same infrared source.",
@@ -1128,8 +1166,8 @@ function practicalQuestion(seed: PracticalSeed): Question {
     paper: 'Across papers',
     course: seed.course,
     tier: 'Both',
-    commandWord: 'Evaluate',
-    commandWordDefinition: 'Describe a scientifically valid method, identify key controls and measurements, analyse how results should be processed, and evaluate limitations or improvements.',
+    commandWord: practicalCommandWords[seed.id] || 'Plan',
+    commandWordDefinition: practicalCommandDefinitions[practicalCommandWords[seed.id] || 'Plan'],
     questionType: 'Extended 6-mark level-of-response',
     prompt: seed.prompt,
     maxMarks: 6,
