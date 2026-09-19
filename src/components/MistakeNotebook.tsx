@@ -44,7 +44,7 @@ function syncAttemptHistory() {
   const ids = new Set(existing.map(entry => entry.id));
   let attempts: AttemptHistory = {};
   try {
-    const parsed = JSON.parse(localStorage.getItem('aqaPhysicsAttemptHistory') || '{}') as AttemptHistory;
+    const parsed = JSON.parse(localStorage.getItem('aqaGcseScienceAttemptHistory') || '{}') as AttemptHistory;
     if (parsed && typeof parsed === 'object') attempts = parsed;
   } catch {
     attempts = {};
@@ -77,7 +77,7 @@ function syncAttemptHistory() {
           totalMarks: attempt.total,
           lostMarkNumber: index + 1,
           reason: misconception ? `Misconception flagged: ${misconception}` : `This response lost mark ${index + 1} of ${lostMarks}.`,
-          improvement: schemePoint ? `Revisit this mark-scheme requirement: ${schemePoint}` : 'Compare your response with the full-mark answer and identify the missing physics statement, calculation step or unit.',
+          improvement: schemePoint ? `Revisit this mark-scheme requirement: ${schemePoint}` : 'Compare your response with the full-mark answer and identify the missing science statement, calculation step or unit.',
           correction: question.modelAnswer,
           misconceptions: attempt.misconceptions || [],
           studentAnswerPreview: attempt.answerPreview || '',
@@ -104,8 +104,8 @@ export function MistakeNotebook({ onPracticeQuestion }: Props) {
   useEffect(() => {
     refresh();
     const onUpdate = () => refresh();
-    window.addEventListener('aqaPhysicsMistakesUpdated', onUpdate);
-    return () => window.removeEventListener('aqaPhysicsMistakesUpdated', onUpdate);
+    window.addEventListener('aqaGcseScienceMistakesUpdated', onUpdate);
+    return () => window.removeEventListener('aqaGcseScienceMistakesUpdated', onUpdate);
   }, []);
 
   const topics = useMemo(() => Array.from(new Set(entries.map(entry => entry.topic))).sort(), [entries]);
@@ -146,8 +146,8 @@ export function MistakeNotebook({ onPracticeQuestion }: Props) {
       return;
     }
     try {
-      localStorage.setItem('aqaPhysicsSelectedQuestion', questionId);
-      localStorage.setItem('aqaPhysicsDraftAnswer', '');
+      localStorage.setItem('aqaGcseScienceSelectedQuestion', questionId);
+      localStorage.setItem('aqaGcseScienceDraftAnswer', '');
     } catch {
       // Reload still takes the user back to practice even if storage is blocked.
     }
