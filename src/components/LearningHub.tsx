@@ -124,11 +124,15 @@ export function LearningHub({
   const [examDate, setExamDate] = useState('');
   const [sixMarkId, setSixMarkId] = useState('');
   const [refresh, setRefresh] = useState(0);
+  const [studentName, setStudentName] = useState('');
+  const [assignmentCodeInput, setAssignmentCodeInput] = useState('');
+  const [shareStatus, setShareStatus] = useState('');
 
   useEffect(() => {
     setResults(safeJson('aqaGcseSciencePracticeResults', {}));
     setAttempts(safeJson('aqaGcseScienceAttemptHistory', {}));
     setExamDate(localStorage.getItem('aqaGcseScienceExamDate') || '');
+    setStudentName(localStorage.getItem('aqaGcseScienceStudentName') || '');
   }, [refresh]);
 
   const bySubject = useMemo(() => ['Biology', 'Chemistry', 'Physics'].map(subject => ({
@@ -227,6 +231,44 @@ export function LearningHub({
     launch(pool[Math.floor(Math.random() * pool.length)]);
   };
 
+  const encodePayload = (value: unknown) => {
+    const bytes = new TextEncoder().encode(JSON.stringify(value));
+    let binary = '';
+    bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  };
+
+  const copyProgressSnapshot = async () => {
+    const weak = topicPerformance.find(item => !item.attempted || item.percent < 70)?.topic || 'No priority recorded';
+    const payload = encodePayload({
+      type: 'gcse-progress-v1',
+      name: studentName.trim() || 'Student',
+      biology: bySubject.find(item => item.subject === 'Biology')?.percent || 0,
+      chemistry: bySubject.find(item => item.subject === 'Chemistry')?.percent || 0,
+      physics: bySubject.find(item => item.subject === 'Physics')?.percent || 0,
+      completed: attemptedCount,
+      weakTopic: weak,
+    });
+    try {
+      await navigator.clipboard.writeText(payload);
+      setShareStatus('Progress snapshot copied for your teacher.');
+      if (studentName.trim()) localStorage.setItem('aqaGcseScienceStudentName', studentName.trim());
+      window.setTimeout(() => setShareStatus(''), 2200);
+    } catch {
+      setShareStatus('Copy was blocked by this browser.');
+    }
+  };
+
+  const openAssignmentCode = () => {
+    const code = assignmentCodeInput.trim();
+    if (!code) return;
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.hash = '';
+    url.searchParams.set('assignment', code);
+    window.location.href = url.toString();
+  };
+
   const nav = [
     ['overview', 'Overview', TrendingUp],
     ['adaptive', 'Adaptive revision', Brain],
@@ -308,6 +350,26 @@ export function LearningHub({
             <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
               <div><div className="flex items-center gap-2 font-bold text-indigo-900"><Sparkles size={18} /> Question of the day</div><div className="mt-1 text-sm text-indigo-900">{questionOfDay.subject} · {questionOfDay.topic} · {questionOfDay.maxMarks} marks</div><p className="mt-2 font-semibold">{questionOfDay.prompt}</p></div>
               <Button onClick={() => launch(questionOfDay)}>Attempt question</Button>
+            </div>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            <div className="rounded-xl border bg-white p-5 shadow-sm">
+              <h3 className="text-lg font-bold">Join a teacher assignment</h3>
+              <p className="mt-1 text-sm text-gray-600">Paste the assignment code your teacher sent. The correct science, topic, paper and tier filters will load automatically.</p>
+              <div className="mt-3 flex gap-2">
+                <input value={assignmentCodeInput} onChange={event => setAssignmentCodeInput(event.target.value)} placeholder="Paste assignment code" className="min-w-0 flex-1 rounded border p-2 text-sm" />
+                <Button onClick={openAssignmentCode} disabled={!assignmentCodeInput.trim()}>Open</Button>
+              </div>
+            </div>
+            <div className="rounded-xl border bg-white p-5 shadow-sm">
+              <h3 className="text-lg font-bold">Share progress with a teacher</h3>
+              <p className="mt-1 text-sm text-gray-600">Creates a compact progress snapshot containing science percentages, completed questions and your current weak topic.</p>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <input value={studentName} onChange={event => setStudentName(event.target.value)} placeholder="Student name" className="min-w-0 flex-1 rounded border p-2 text-sm" />
+                <Button variant="outline" onClick={copyProgressSnapshot}>Copy progress snapshot</Button>
+              </div>
+              {shareStatus ? <div className="mt-2 text-xs font-medium text-emerald-700">{shareStatus}</div> : null}
             </div>
           </div>
         </>
