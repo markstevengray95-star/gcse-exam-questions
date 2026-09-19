@@ -93,21 +93,21 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const transcriptionPrompt = `You are performing a forensic-quality transcription of ONE photographed page of an AQA A-level Physics student exam script.
+    const transcriptionPrompt = `You are performing a forensic-quality transcription of ONE photographed page of an AQA GCSE Science student exam script.
 
 This is page ${pageNumber} of ${totalPages}. Paper label: ${paperLabel}.
 
 Your job is to READ, not mark.
-- Transcribe the student's final visible answer faithfully. Do not improve grammar, physics, equations or numerical work.
+- Transcribe the student's final visible answer faithfully. Do not improve grammar, science, equations or numerical work.
 - Preserve equation symbols, negative signs, powers of ten, prefixes, units, decimal points, significant figures and inequality signs as accurately as possible.
 - Preserve the order of working. Use plain-text mathematical notation where necessary, for example 3.2e-4, v^2, deltaE.
 - Identify visible question/sub-question numbers exactly where possible.
-- If text or a character is genuinely uncertain, write [unclear: ...] in the transcription and list it in unclearSegments. NEVER silently guess an uncertain digit, sign, unit or physics word.
+- If text or a character is genuinely uncertain, write [unclear: ...] in the transcription and list it in unclearSegments. NEVER silently guess an uncertain digit, sign, unit or science word.
 - Distinguish crossed-out work from the final uncrossed answer. Mention materially relevant crossed-out work in visualEvidence but do not treat it as the final response unless it is clearly reinstated.
 - Describe graphs, diagrams, circuit additions, labelled arrows, drawn field lines, working on axes and other non-text evidence in visualEvidence. Include axis labels, units, gradient triangles and selected multiple-choice boxes when visible.
 - If the image is blurred, cropped, shadowed, rotated, low-resolution or has glare, put that in warnings and reduce handwritingConfidence.
 - pageQuality should be one of: excellent, good, usable, poor.
-- handwritingConfidence is confidence in faithful transcription, not confidence in whether the physics is correct.
+- handwritingConfidence is confidence in faithful transcription, not confidence in whether the science is correct.
 - Do not invent content outside the photographed page.`;
 
     const first = await model.generateContent([
