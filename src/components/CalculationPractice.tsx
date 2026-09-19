@@ -29,7 +29,7 @@ function calculationPool() {
   return questions.filter(question => question.commandWord === 'Calculate' || question.questionType === 'Short calculation');
 }
 
-export function CalculationPractice({ apiKey = '' }: { apiKey?: string }) {
+export function CalculationPractice() {
   const pool = useMemo(() => calculationPool(), []);
   const topics = useMemo(() => Array.from(new Set(pool.map(question => question.topic))).sort(), [pool]);
   const [topic, setTopic] = useState('all');
@@ -82,10 +82,6 @@ export function CalculationPractice({ apiKey = '' }: { apiKey?: string }) {
     setError('');
     setResult(null);
     try {
-      let activeKey = apiKey;
-      if (!activeKey) {
-        try { activeKey = sessionStorage.getItem('aqaGcseScienceApiKey') || ''; } catch { activeKey = ''; }
-      }
       const studentAnswer = [
         equation.trim() ? `Equation / method: ${equation.trim()}` : '',
         working.trim() ? `Substitution / working: ${working.trim()}` : '',
@@ -104,7 +100,6 @@ export function CalculationPractice({ apiKey = '' }: { apiKey?: string }) {
           modelAnswer: question.modelAnswer,
           strictness: 'standard',
           provider: 'online',
-          apiKey: activeKey,
         }),
       });
       const data = await response.json();
