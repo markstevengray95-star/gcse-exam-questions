@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: gcse-science-app-checks
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
