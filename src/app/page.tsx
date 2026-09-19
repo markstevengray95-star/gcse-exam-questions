@@ -22,6 +22,7 @@ import { TeacherDashboard } from '@/components/TeacherDashboard';
 import { AccessibilityMenu } from '@/components/AccessibilityMenu';
 import { DiagramAnswerPad } from '@/components/DiagramAnswerPad';
 import { MarkReviewTools } from '@/components/MarkReviewTools';
+import { PartialMarkExamples } from '@/components/PartialMarkExamples';
 import {
   AttemptHistoryPanel,
   ConfidenceCalibration,
@@ -835,6 +836,7 @@ export default function Home() {
               <Button variant="outline" size="sm" onClick={() => window.print()}>Print report</Button>
             </div>
             <FeedbackDisplay result={feedback} onRewrite={activeTab === 'practice' ? handleRewrite : undefined} />
+            {activeTab === 'practice' ? <div className="mt-6"><PartialMarkExamples question={currentQuestion} result={feedback} /></div> : null}
             {activeTab === 'practice' ? <div className="mt-6"><MarkReviewTools question={currentQuestion} result={feedback} studentAnswer={answer} onOverride={handleTeacherOverride} /></div> : null}
             {activeTab === 'practice' ? (
               <div className="mt-6 space-y-6">
