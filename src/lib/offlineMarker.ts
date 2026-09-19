@@ -70,7 +70,7 @@ function hasSynonym(answer: string, word: string) {
 
 function expectedEquations(text: string) {
   const compact = normalise(text).replace(/\s+/g, '');
-  const equations = [
+  const equations: Array<[string, RegExp]> = [
     ['f=ma', /f=ma|force=.*mass.*acceleration|mass.*acceleration/],
     ['v=ir', /v=ir|voltage=.*current.*resistance|current.*resistance/],
     ['p=vi', /p=vi|power=.*voltage.*current/],
@@ -240,15 +240,15 @@ function levelOfResponse(maxMarks: number, creditedCount: number, structure: Ret
 export function offlineMark(body: any) {
   const answer = normalise(String(body.studentAnswer || ''));
   const maxMarks = Math.max(0, Math.trunc(Number(body.maxMarks) || 0));
-  const scheme = Array.isArray(body.markScheme) ? body.markScheme.map(String) : [];
+  const scheme: string[] = Array.isArray(body.markScheme) ? body.markScheme.map(String) : [];
   const commandWord = String(body.commandWord || 'None');
   const isCalculation =
     /calculate|determine|show/i.test(commandWord) ||
     scheme.some((point: string) => /\[(C|A)\d+\]/.test(point)) ||
     /equation|substitut|calculate/i.test(scheme.join(' '));
 
-  const points = scheme.map((point: string) => pointEvidence(answer, point));
-  const credited = points.filter(point => point.strong);
+  const points: MarkPointEvidence[] = scheme.map((point: string) => pointEvidence(answer, point));
+  const credited: MarkPointEvidence[] = points.filter((point: MarkPointEvidence) => point.strong);
   const structure = structureScore(commandWord, answer);
   const contradictions = contradictionFlags(answer);
   const lor = levelOfResponse(maxMarks, credited.length, structure);
@@ -280,10 +280,10 @@ export function offlineMark(body: any) {
     ),
   );
 
-  const missing = points.filter(point => !point.strong);
+  const missing: MarkPointEvidence[] = points.filter((point: MarkPointEvidence) => !point.strong);
   const units = unitAudit(answer, scheme, isCalculation);
-  const presentKeywords = Array.from(new Set(credited.flatMap(point => point.hits))).slice(0, 16);
-  const missingKeywords = Array.from(new Set(missing.flatMap(point => point.words))).slice(0, 16);
+  const presentKeywords = Array.from(new Set(credited.flatMap((point: MarkPointEvidence) => point.hits))).slice(0, 16);
+  const missingKeywords = Array.from(new Set(missing.flatMap((point: MarkPointEvidence) => point.words))).slice(0, 16);
 
   return {
     marksAwarded: awarded,
@@ -300,7 +300,7 @@ export function offlineMark(body: any) {
       missingKeywords,
       laymanTermsUsed: [],
     },
-    creditedPoints: credited.slice(0, maxMarks).map((point, index) => ({
+    creditedPoints: credited.slice(0, maxMarks).map((point: MarkPointEvidence, index: number) => ({
       mark: point.scheme.match(/\[[^\]]+\]/)?.[0] || `Point ${index + 1}`,
       studentEvidence: point.numericHit
         ? 'A numerical value matches an expected result within tolerance.'
@@ -310,7 +310,7 @@ export function offlineMark(body: any) {
             ? `Matched scientific evidence: ${point.hits.join(', ')}.`
             : 'Equivalent scientific evidence detected.',
     })),
-    lostMarksAnalysis: missing.slice(0, Math.max(0, maxMarks - awarded)).map(point => ({
+    lostMarksAnalysis: missing.slice(0, Math.max(0, maxMarks - awarded)).map((point: MarkPointEvidence) => ({
       reason: `Insufficient evidence for: ${point.scheme.replace(/^\[[^\]]+\]\s*/, '')}`,
       improvementSuggestion:
         /explain/i.test(commandWord)
