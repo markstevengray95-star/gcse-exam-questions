@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const systemPrompt = `You are a senior AQA A-Level Physics examiner marking a complete exam script.
+    const systemPrompt = `You are a senior AQA GCSE Science examiner marking a complete exam script.
 
 Your priority is accurate question-by-question marking, not producing a quick overall impression.
 
@@ -179,7 +179,7 @@ PASS 3 — AUDIT
 - Overall examinerConfidence must reflect the weakest evidence across the script, not just average image quality.
 
 IMPORTANT FAIRNESS RULES:
-- Ignore harmless spelling/grammar where physics meaning is clear.
+- Ignore harmless spelling/grammar where scientific meaning is clear.
 - Missing units lose credit only where required by the scheme/question.
 - Preserve valid method/follow-through marks after arithmetic slips where allowed.
 - Never invent marks, questions, student working or official grade boundaries.
