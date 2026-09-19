@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Accessibility, Minus, Plus, RotateCcw } from 'lucide-react';
+import { Accessibility, Minus, Plus, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 
 type Prefs = {
   fontScale: number;
@@ -24,6 +24,7 @@ function applyPrefs(prefs: Prefs) {
 export function AccessibilityMenu() {
   const [open, setOpen] = useState(false);
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
+  const [speaking, setSpeaking] = useState(false);
 
   useEffect(() => {
     try {
@@ -44,6 +45,24 @@ export function AccessibilityMenu() {
   };
 
   const reset = () => update(DEFAULTS);
+
+  const toggleReadAloud = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+    const main = document.querySelector('main');
+    const text = main?.textContent?.replace(/\s+/g, ' ').trim().slice(0, 12000) || '';
+    if (!text) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+    setSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  };
 
   return (
     <div className="relative">
@@ -88,6 +107,9 @@ export function AccessibilityMenu() {
               <span>Readable font</span>
               <input type="checkbox" checked={prefs.readableFont} onChange={event => update({ readableFont: event.target.checked })} />
             </label>
+            <button type="button" onClick={toggleReadAloud} className="flex w-full items-center justify-between rounded-lg bg-blue-50 p-2 font-medium text-blue-900 hover:bg-blue-100">
+              <span>Read page aloud</span>{speaking ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            </button>
           </div>
         </div>
       ) : null}
