@@ -158,10 +158,10 @@ export default function Home() {
   const filteredAveragePercent = filteredAvailableMarks ? Math.round((filteredEarnedMarks / filteredAvailableMarks) * 100) : 0;
 
   useEffect(() => {
-    const savedResults = safeStoredResults(localStorage.getItem('aqaPhysicsPracticeResults'));
-    const savedAttempts = safeStoredAttempts(localStorage.getItem('aqaPhysicsAttemptHistory'));
-    const savedAnswer = localStorage.getItem('aqaPhysicsDraftAnswer');
-    const savedQuestion = localStorage.getItem('aqaPhysicsSelectedQuestion');
+    const savedResults = safeStoredResults(localStorage.getItem('aqaGcseSciencePracticeResults'));
+    const savedAttempts = safeStoredAttempts(localStorage.getItem('aqaGcseScienceAttemptHistory'));
+    const savedAnswer = localStorage.getItem('aqaGcseScienceDraftAnswer');
+    const savedQuestion = localStorage.getItem('aqaGcseScienceSelectedQuestion');
 
     setPracticeResults(savedResults);
     setAttemptHistory(savedAttempts);
@@ -173,7 +173,7 @@ export default function Home() {
   useEffect(() => {
     if (!historyLoaded) return;
     try {
-      localStorage.setItem('aqaPhysicsPracticeResults', JSON.stringify(practiceResults));
+      localStorage.setItem('aqaGcseSciencePracticeResults', JSON.stringify(practiceResults));
     } catch {
       // Storage can be unavailable in private browsing or locked-down browsers.
     }
@@ -182,7 +182,7 @@ export default function Home() {
   useEffect(() => {
     if (!historyLoaded) return;
     try {
-      localStorage.setItem('aqaPhysicsAttemptHistory', JSON.stringify(attemptHistory));
+      localStorage.setItem('aqaGcseScienceAttemptHistory', JSON.stringify(attemptHistory));
     } catch {
       // Attempt summaries are optional; the app still works if storage is unavailable.
     }
@@ -191,8 +191,8 @@ export default function Home() {
   useEffect(() => {
     if (!historyLoaded || isGeneratedQuestion) return;
     try {
-      localStorage.setItem('aqaPhysicsDraftAnswer', answer);
-      localStorage.setItem('aqaPhysicsSelectedQuestion', selectedQuestionId);
+      localStorage.setItem('aqaGcseScienceDraftAnswer', answer);
+      localStorage.setItem('aqaGcseScienceSelectedQuestion', selectedQuestionId);
     } catch {
       // Keep the app usable even when storage is unavailable.
     }
@@ -200,9 +200,9 @@ export default function Home() {
 
   useEffect(() => {
     try {
-      const sessionKey = sessionStorage.getItem('aqaPhysicsApiKey');
+      const sessionKey = sessionStorage.getItem('aqaGcseScienceApiKey');
       if (sessionKey) setApiKey(sessionKey);
-      localStorage.removeItem('aqaPhysicsApiKey');
+      localStorage.removeItem('aqaGcseScienceApiKey');
     } catch {
       // Session storage is optional; the server environment key can still be used.
     }
@@ -257,10 +257,10 @@ export default function Home() {
     setFeedback(null);
     setMarkingError('');
     setFollowUpQuestion(null);
-    localStorage.removeItem('aqaPhysicsPracticeResults');
-    localStorage.removeItem('aqaPhysicsAttemptHistory');
-    localStorage.removeItem('aqaPhysicsDraftAnswer');
-    localStorage.removeItem('aqaPhysicsSelectedQuestion');
+    localStorage.removeItem('aqaGcseSciencePracticeResults');
+    localStorage.removeItem('aqaGcseScienceAttemptHistory');
+    localStorage.removeItem('aqaGcseScienceDraftAnswer');
+    localStorage.removeItem('aqaGcseScienceSelectedQuestion');
   };
 
   const handleRandomQuestion = () => {
@@ -447,8 +447,8 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-gray-800 bg-gray-950 text-white shadow-sm">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <div className="text-xl font-bold">AQA Physics Exam Translator</div>
-            <div className="text-xs text-gray-400">Practice, mark, review, and target weak areas</div>
+            <div className="text-xl font-bold">AQA GCSE Science Exam Marker</div>
+            <div className="text-xs text-gray-400">Biology, Chemistry & Physics practice, marking and targeted revision</div>
           </div>
 
           <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
@@ -463,8 +463,8 @@ export default function Home() {
                   const value = event.target.value;
                   setApiKey(value);
                   try {
-                    if (value) sessionStorage.setItem('aqaPhysicsApiKey', value);
-                    else sessionStorage.removeItem('aqaPhysicsApiKey');
+                    if (value) sessionStorage.setItem('aqaGcseScienceApiKey', value);
+                    else sessionStorage.removeItem('aqaGcseScienceApiKey');
                   } catch {
                     // Optional convenience only.
                   }
