@@ -1,6 +1,7 @@
 import { specCoverageQuestions, specificationCoverageAudit } from './specCoverageQuestions';
 import { expandedQuestionBank } from './expandedQuestionBank';
 import { recurringExamQuestionBank } from './recurringExamQuestionBank';
+import { practicalAndCoreExpansion, practicalExpansionAudit } from './practicalAndCoreExpansion';
 import type { Question } from './questionTypes';
 export type { Question } from './questionTypes';
 
@@ -149,6 +150,7 @@ export const questions: Question[] = [
   ...calculationQuestions,
   ...expandedQuestionBank,
   ...recurringExamQuestionBank,
+  ...practicalAndCoreExpansion,
 ];
 
 function auditQuestionBank(bank: Question[]) {
@@ -160,6 +162,10 @@ function auditQuestionBank(bank: Question[]) {
     if (question.maxMarks < 1 || question.maxMarks > 6) throw new Error(`Question ${question.id} has invalid marks.`);
     if (!question.markScheme.length) throw new Error(`Question ${question.id} has no mark scheme.`);
     if (!question.modelAnswer.trim()) throw new Error(`Question ${question.id} has no model answer.`);
+    const practicalLinked = Boolean(question.pag) || question.topic.toLowerCase().includes('required practical');
+    if (practicalLinked && question.maxMarks !== 6) {
+      throw new Error(`Required-practical question ${question.id} must be worth exactly 6 marks.`);
+    }
   }
   return {
     total: bank.length,
@@ -171,6 +177,7 @@ function auditQuestionBank(bank: Question[]) {
     extended: bank.filter(question => question.questionType === 'Extended 6-mark level-of-response').length,
     practicals: bank.filter(question => question.topic.toLowerCase().includes('required practical')).length,
     recurringExamStyle: recurringExamQuestionBank.length,
+    practicalExpansion: practicalExpansionAudit,
   };
 }
 
