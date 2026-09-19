@@ -226,7 +226,6 @@ export async function POST(req: NextRequest) {
       questionInlineData,
       maxMarks,
       provider = 'online',
-      apiKey = '',
     } = body;
 
     if ((!studentAnswer && !studentInlineData) || (!questionPrompt && !questionInlineData)) {
@@ -241,7 +240,7 @@ export async function POST(req: NextRequest) {
       // Deterministic fallback: works in Vercel/browser deployments without Ollama or an API key.
       return NextResponse.json(clampResult(offlineMark(body), numericMaxMarks));
     } else {
-      const activeKey = apiKey || process.env.GEMINI_API_KEY;
+      const activeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
       if (!activeKey) {
         const result = clampResult(offlineMark(body), numericMaxMarks);
         return NextResponse.json({ ...result, fallbackUsed: true, fallbackReason: 'No AI API key configured; offline examiner used automatically.' });
