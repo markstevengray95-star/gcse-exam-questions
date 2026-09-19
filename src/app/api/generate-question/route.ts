@@ -54,9 +54,9 @@ export async function POST(req: NextRequest) {
         maxMarks: requestedMarks,
         difficulty,
         questionType: requestedMarks === 6 ? 'Extended 6-mark level-of-response' : 'Short explanation',
-        prompt: requestedMarks === 6 ? base.prompt : `${base.prompt} Give enough clear physics for ${requestedMarks} marks.`,
+        prompt: requestedMarks === 6 ? base.prompt : `${base.prompt} Give enough clear GCSE science for ${requestedMarks} marks.`,
         markScheme: base.markScheme.slice(0, requestedMarks),
-        source: `Original AQA specification-style generator · ${point.specCode} ${point.label}.`,
+        source: `Original AQA GCSE Science specification-style generator · ${point.specCode} ${point.label}.`,
       },
     });
   } catch (error) {
