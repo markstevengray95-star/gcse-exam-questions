@@ -193,7 +193,7 @@ export function FeedbackDisplay({ result, onRewrite }: Props) {
             <CardTitle>Examiner analysis</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <div><strong>Physics principles:</strong> {render(result.inDepthAnalysis.physicsPrinciples)}</div>
+            <div><strong>Science principles:</strong> {render(result.inDepthAnalysis.physicsPrinciples)}</div>
             <div><strong>Working/reasoning:</strong> {render(result.inDepthAnalysis.stepByStepReasoning)}</div>
             <div><strong>Structure:</strong> {render(result.inDepthAnalysis.structureAndClarity)}</div>
           </CardContent>
