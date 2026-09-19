@@ -300,6 +300,7 @@ export function LearningHub({
           </div>
           <div className="flex flex-wrap gap-2">
             <Button onClick={launchAdaptive}><Target size={16} /> Start best next question</Button>
+            <Button variant="outline" onClick={() => window.print()}>Print progress report</Button>
             <Button variant="outline" onClick={() => setRefresh(value => value + 1)}>Refresh progress</Button>
           </div>
         </div>
