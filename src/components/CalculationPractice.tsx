@@ -13,7 +13,7 @@ const EMPTY_STATS: Stats = { attempts: 0, earned: 0, available: 0, fullMarks: 0 
 
 function loadStats(): Stats {
   try {
-    const parsed = JSON.parse(localStorage.getItem('aqaPhysicsCalculationStats') || '{}') as Partial<Stats>;
+    const parsed = JSON.parse(localStorage.getItem('aqaGcseScienceCalculationStats') || '{}') as Partial<Stats>;
     return {
       attempts: Number(parsed.attempts) || 0,
       earned: Number(parsed.earned) || 0,
@@ -84,7 +84,7 @@ export function CalculationPractice({ apiKey = '' }: { apiKey?: string }) {
     try {
       let activeKey = apiKey;
       if (!activeKey) {
-        try { activeKey = sessionStorage.getItem('aqaPhysicsApiKey') || ''; } catch { activeKey = ''; }
+        try { activeKey = sessionStorage.getItem('aqaGcseScienceApiKey') || ''; } catch { activeKey = ''; }
       }
       const studentAnswer = [
         equation.trim() ? `Equation / method: ${equation.trim()}` : '',
@@ -118,7 +118,7 @@ export function CalculationPractice({ apiKey = '' }: { apiKey?: string }) {
           available: previous.available + marked.totalMarks,
           fullMarks: previous.fullMarks + (marked.marksAwarded === marked.totalMarks ? 1 : 0),
         };
-        try { localStorage.setItem('aqaPhysicsCalculationStats', JSON.stringify(next)); } catch { /* optional */ }
+        try { localStorage.setItem('aqaGcseScienceCalculationStats', JSON.stringify(next)); } catch { /* optional */ }
         return next;
       });
     } catch (err) {
