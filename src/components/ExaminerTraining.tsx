@@ -23,16 +23,22 @@ function splitModelAnswer(answer: string) {
 }
 
 function plausibleMisconception(question: Question) {
-  const text = `${question.topic} ${question.subTopic} ${question.prompt}`.toLowerCase();
-  if (/photoelectric|photon|quantum/.test(text)) return 'Increasing the intensity makes each photon more energetic.';
-  if (/circuit|current|resistance|potential|battery/.test(text)) return 'Some of the current is used up as it passes through the component.';
-  if (/wave|interference|diffraction|coherent/.test(text)) return 'The sources must have the same amplitude to be coherent.';
-  if (/force|motion|momentum|mechanic/.test(text)) return 'A forward force must keep acting for an object to continue moving at constant speed.';
-  if (/young|stress|strain|material|hooke/.test(text)) return 'The material obeys Hooke’s law at every extension.';
-  if (/thermal|temperature|gas|specific heat/.test(text)) return 'Temperature measures the total internal energy stored in the object.';
-  if (/electric field|gravitational|magnetic|field/.test(text)) return 'The field strength is constant everywhere because field lines never cross.';
-  if (/radioactive|nuclear|half-life|decay/.test(text)) return 'A larger sample makes each individual nucleus more likely to decay.';
-  return 'The effect happens because energy is used up during the process.';
+  const text = `${question.subject} ${question.topic} ${question.subTopic} ${question.prompt}`.toLowerCase();
+  if (/photosynth|respirat/.test(text)) return 'Plants only respire when there is no light.';
+  if (/enzyme/.test(text)) return 'The enzyme is used up by the reaction.';
+  if (/diffusion|osmosis|active transport/.test(text)) return 'All movement across membranes requires energy.';
+  if (/genetic|allele|mutation|evolution/.test(text)) return 'Organisms change because they need to adapt during their lifetime.';
+  if (/antibiotic|bacteria|virus/.test(text)) return 'Antibiotics can kill viruses as well as bacteria.';
+  if (/bond|ionic|covalent|metallic/.test(text)) return 'Ionic compounds conduct electricity as solids because they contain charged ions.';
+  if (/rate|collision/.test(text)) return 'A catalyst increases the energy released by a reaction.';
+  if (/equilibrium/.test(text)) return 'At equilibrium the forward and reverse reactions have stopped.';
+  if (/acid|ph/.test(text)) return 'A lower pH means a weaker acid.';
+  if (/current|circuit|resistance|potential/.test(text)) return 'Current is used up as it passes through a component.';
+  if (/mass|weight|force/.test(text)) return 'Mass and weight are the same quantity.';
+  if (/temperature|internal energy|particle/.test(text)) return 'Temperature is the total energy stored by an object.';
+  if (/radioactive|half-life|decay/.test(text)) return 'A larger sample changes the half-life of the isotope.';
+  if (/wave|frequency|wavelength/.test(text)) return 'Increasing frequency always increases wave speed.';
+  return 'The answer contains a scientifically plausible statement but one important relationship is missing or incorrect.';
 }
 
 function calculationResponse(question: Question, level: ResponseLevel) {
@@ -82,7 +88,7 @@ function levelLabel(level: ResponseLevel) {
   return 'Nearly full response';
 }
 
-export function ExaminerTraining() {
+export function ExaminerTraining({ onPracticeQuestion }: { onPracticeQuestion?: (questionId: string) => void }) {
   const [topic, setTopic] = useState('all');
   const [difficulty, setDifficulty] = useState('all');
   const [questionType, setQuestionType] = useState('all');
@@ -92,6 +98,7 @@ export function ExaminerTraining() {
   const [trainingResult, setTrainingResult] = useState<AnalysisResult | null>(null);
   const [trainingLoading, setTrainingLoading] = useState(false);
   const [trainingError, setTrainingError] = useState('');
+  const [markerMode, setMarkerMode] = useState<'online' | 'offline'>('online');
   const [attempts, setAttempts] = useState<TrainingAttempt[]>([]);
 
   const topics = useMemo(() => Array.from(new Set(questions.map(question => question.topic))).sort(), []);
@@ -135,8 +142,6 @@ export function ExaminerTraining() {
     setTrainingLoading(true);
     setTrainingError('');
     setTrainingResult(null);
-    let apiKey = '';
-    try { apiKey = sessionStorage.getItem('aqaGcseScienceApiKey') || ''; } catch { apiKey = ''; }
 
     try {
       const response = await fetch('/api/analyze', {
@@ -150,8 +155,7 @@ export function ExaminerTraining() {
           markScheme: trainingQuestion.markScheme,
           modelAnswer: trainingQuestion.modelAnswer,
           strictness: 'standard',
-          provider: 'online',
-          apiKey,
+          provider: markerMode,
         }),
       });
       const data = await response.json();
@@ -171,6 +175,10 @@ export function ExaminerTraining() {
 
   const practiseQuestion = () => {
     if (!trainingQuestion) return;
+    if (onPracticeQuestion) {
+      onPracticeQuestion(trainingQuestion.id);
+      return;
+    }
     localStorage.setItem('aqaGcseScienceSelectedQuestion', trainingQuestion.id);
     localStorage.setItem('aqaGcseScienceDraftAnswer', '');
     window.location.reload();
@@ -188,6 +196,17 @@ export function ExaminerTraining() {
           <div className="rounded-xl border bg-slate-50 px-3 py-2"><div className="text-xl font-extrabold">{attempts.length}</div><div className="text-[10px] font-bold uppercase text-slate-500">Marked</div></div>
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2"><div className="text-xl font-extrabold text-emerald-800">{attempts.length ? Math.round(exactCount / attempts.length * 100) : 0}%</div><div className="text-[10px] font-bold uppercase text-emerald-600">Exact</div></div>
           <div className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2"><div className="text-xl font-extrabold text-blue-800">{averageDifference}</div><div className="text-[10px] font-bold uppercase text-blue-600">Avg gap</div></div>
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50 p-3">
+        <div>
+          <div className="font-bold text-indigo-950">Examiner engine</div>
+          <div className="text-xs text-indigo-800">Use AI for nuanced marking or the improved offline examiner for a fully local rule-based check.</div>
+        </div>
+        <div className="flex rounded-lg bg-white p-1 text-sm font-semibold shadow-sm">
+          <button type="button" onClick={() => { setMarkerMode('online'); resetReveal(); }} className={`rounded-md px-3 py-2 ${markerMode === 'online' ? 'bg-indigo-700 text-white' : 'text-slate-600'}`}>AI examiner</button>
+          <button type="button" onClick={() => { setMarkerMode('offline'); resetReveal(); }} className={`rounded-md px-3 py-2 ${markerMode === 'offline' ? 'bg-amber-600 text-white' : 'text-slate-600'}`}>Offline examiner</button>
         </div>
       </div>
 
@@ -225,7 +244,7 @@ export function ExaminerTraining() {
                 {(() => {
                   const difference = studentMark - trainingResult.marksAwarded;
                   const exact = difference === 0;
-                  return <div className={`rounded-xl border p-4 ${exact ? 'border-emerald-200 bg-emerald-50' : Math.abs(difference) === 1 ? 'border-blue-200 bg-blue-50' : 'border-amber-200 bg-amber-50'}`}><div className="flex flex-wrap items-center gap-3"><div className="text-2xl font-extrabold">Examiner: {trainingResult.marksAwarded}/{trainingResult.totalMarks}</div><div className="text-lg font-bold">You: {studentMark}/{trainingQuestion.maxMarks}</div>{exact ? <Badge className="bg-emerald-700"><CheckCircle2 size={13} className="mr-1" />Exact match</Badge> : <Badge className="bg-amber-700"><CircleAlert size={13} className="mr-1" />{difference > 0 ? `You were ${difference} too generous` : `You were ${Math.abs(difference)} too harsh`}</Badge>}</div><p className="mt-2 text-sm">{exact ? 'Your judgement matched the examiner engine exactly.' : Math.abs(difference) === 1 ? 'You were within one mark — inspect the evidence below to see the boundary you interpreted differently.' : 'Compare each mark point below and identify where your judgement diverged.'}</p></div>;
+                  return <div className={`rounded-xl border p-4 ${exact ? 'border-emerald-200 bg-emerald-50' : Math.abs(difference) === 1 ? 'border-blue-200 bg-blue-50' : 'border-amber-200 bg-amber-50'}`}><div className="flex flex-wrap items-center gap-3"><div className="text-2xl font-extrabold">{markerMode === 'offline' ? 'Offline examiner' : 'Examiner'}: {trainingResult.marksAwarded}/{trainingResult.totalMarks}</div><div className="text-lg font-bold">You: {studentMark}/{trainingQuestion.maxMarks}</div>{exact ? <Badge className="bg-emerald-700"><CheckCircle2 size={13} className="mr-1" />Exact match</Badge> : <Badge className="bg-amber-700"><CircleAlert size={13} className="mr-1" />{difference > 0 ? `You were ${difference} too generous` : `You were ${Math.abs(difference)} too harsh`}</Badge>}</div><p className="mt-2 text-sm">{exact ? 'Your judgement matched the examiner engine exactly.' : Math.abs(difference) === 1 ? 'You were within one mark — inspect the evidence below to see the boundary you interpreted differently.' : 'Compare each mark point below and identify where your judgement diverged.'}</p></div>;
                 })()}
 
                 <div className="grid gap-4 lg:grid-cols-2">
