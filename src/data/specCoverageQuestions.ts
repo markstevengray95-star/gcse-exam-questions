@@ -1,7 +1,7 @@
-import type { PracticeQuestion } from './practiceQuestions';
+import type { Question } from './questions';
 import { specificationPoints } from './specification';
 
-export type SpecCoverageQuestion = PracticeQuestion & { specificationPointId: string };
+export type SpecCoverageQuestion = Question & { specificationPointId: string };
 
 export const specCoverageQuestions: SpecCoverageQuestion[] = specificationPoints.map(point => ({
   id: `coverage-${point.id}`,
@@ -10,12 +10,18 @@ export const specCoverageQuestions: SpecCoverageQuestion[] = specificationPoints
   unit: point.unit,
   topic: point.topic,
   subTopic: point.label,
-  commandWord: 'Explain',
-  commandWordDefinition: 'Set out the relevant physics using clear linked statements.',
-  questionType: 'Extended 6-mark level-of-response',
+  subject: point.subject,
+  paper: point.paper,
+  course: point.course,
+  tier: point.tier,
+  commandWord: point.id.includes('practicals') || point.id === 'working-scientifically' ? 'Evaluate' : 'Explain',
+  commandWordDefinition: point.id.includes('practicals') || point.id === 'working-scientifically'
+    ? 'Use scientific evidence to identify strengths, limitations and justified improvements.'
+    : 'Set out scientific reasons or mechanisms using clear linked statements.',
+  questionType: point.id.includes('practicals') || point.id === 'working-scientifically' ? 'Data analysis' : 'Extended 6-mark level-of-response',
   prompt: point.prompt,
   maxMarks: 6,
-  difficulty: point.option ? 'Hard' : 'Medium',
+  difficulty: point.course === 'Separate only' || point.tier === 'Higher only' ? 'Hard' : 'Medium',
   hint: point.hint,
   template: '',
   requiredKeywords: point.match.slice(0, 10),
@@ -35,5 +41,5 @@ export function specificationCoverageAudit() {
 
 const audit = specificationCoverageAudit();
 if (audit.uncovered.length) {
-  throw new Error(`AQA question coverage is incomplete: ${audit.uncovered.map(point => point.specCode).join(', ')}`);
+  throw new Error(`AQA GCSE Science question coverage is incomplete: ${audit.uncovered.map(point => point.specCode).join(', ')}`);
 }
