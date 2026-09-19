@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
     const markSchemeText = String(body?.markSchemeText || '').trim();
     const paperLabel = String(body?.paperLabel || '').trim();
     const scriptPages = normalizePages(body?.scriptPages);
-    const activeKey = body?.apiKey || process.env.GEMINI_API_KEY;
+    const activeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
     if (!body?.examFileData && !examText && !scriptPages.length) {
       return NextResponse.json({ error: 'Provide a completed script file, pasted answers, or at least one photographed script page.' }, { status: 400 });
