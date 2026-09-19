@@ -17,6 +17,10 @@ import { QuestionGenerator, type GeneratedQuestion } from '@/components/Question
 import { PerformanceInsights } from '@/components/PerformanceInsights';
 import { DataSheetDrawer } from '@/components/DataSheetDrawer';
 import { StudyTools } from '@/components/StudyTools';
+import { LearningHub } from '@/components/LearningHub';
+import { TeacherDashboard } from '@/components/TeacherDashboard';
+import { AccessibilityMenu } from '@/components/AccessibilityMenu';
+import { DiagramAnswerPad } from '@/components/DiagramAnswerPad';
 import {
   AttemptHistoryPanel,
   ConfidenceCalibration,
@@ -35,7 +39,7 @@ import 'katex/dist/katex.min.css';
 
 type PracticeResult = { marks: number; total: number };
 type PracticeResults = Record<string, PracticeResult>;
-type ActiveTab = 'practice' | 'custom' | 'whole' | 'dashboard';
+type ActiveTab = 'practice' | 'learn' | 'custom' | 'whole' | 'dashboard' | 'teacher';
 
 function topicScores(allQuestions: Question[], results: PracticeResults) {
   return Array.from(new Set(allQuestions.map(question => question.topic)))
@@ -121,8 +125,13 @@ export default function Home() {
   const [apiKey, setApiKey] = useState('');
   const [activeTab, setActiveTab] = useState<ActiveTab>('practice');
   const [isDataSheetOpen, setIsDataSheetOpen] = useState(false);
+  const [subjectFilter, setSubjectFilter] = useState('all');
+  const [courseFilter, setCourseFilter] = useState('all');
+  const [tierFilter, setTierFilter] = useState('all');
+  const [paperFilter, setPaperFilter] = useState('all');
   const [topicFilter, setTopicFilter] = useState('all');
   const [difficultyFilter, setDifficultyFilter] = useState('all');
+  const [assignmentNotice, setAssignmentNotice] = useState('');
   const [practiceResults, setPracticeResults] = useState<PracticeResults>({});
   const [isRewriteMode, setIsRewriteMode] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
@@ -130,10 +139,14 @@ export default function Home() {
   const uniqueTopics = useMemo(() => Array.from(new Set(questions.map(question => question.topic))).sort(), []);
   const filteredQuestions = useMemo(
     () => questions.filter(question =>
+      (subjectFilter === 'all' || question.subject === subjectFilter || question.subject === 'Science') &&
+      (courseFilter !== 'combined' || question.course !== 'Separate only') &&
+      (tierFilter !== 'foundation' || question.tier !== 'Higher only') &&
+      (paperFilter === 'all' || question.paper === paperFilter || question.paper === 'Across papers') &&
       (topicFilter === 'all' || question.topic === topicFilter) &&
       (difficultyFilter === 'all' || question.difficulty === difficultyFilter),
     ),
-    [topicFilter, difficultyFilter],
+    [subjectFilter, courseFilter, tierFilter, paperFilter, topicFilter, difficultyFilter],
   );
 
   const currentBankQuestion = questions.find(question => question.id === selectedQuestionId) || questions[0];
@@ -167,6 +180,26 @@ export default function Home() {
     setAttemptHistory(savedAttempts);
     if (savedAnswer) setAnswer(savedAnswer);
     if (savedQuestion && questions.some(question => question.id === savedQuestion)) setSelectedQuestionId(savedQuestion);
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('assignment');
+      if (code) {
+        const normalised = code.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = normalised + '='.repeat((4 - normalised.length % 4) % 4);
+        const binary = atob(padded);
+        const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+        const assignment = JSON.parse(new TextDecoder().decode(bytes)) as { subject?: string; topic?: string; paper?: string; tier?: string; questionCount?: number };
+        if (assignment.subject && assignment.subject !== 'All') setSubjectFilter(assignment.subject);
+        if (assignment.topic && assignment.topic !== 'All') setTopicFilter(assignment.topic);
+        if (assignment.paper && assignment.paper !== 'All') setPaperFilter(assignment.paper);
+        if (assignment.tier === 'Foundation') setTierFilter('foundation');
+        if (assignment.tier === 'Higher') setTierFilter('higher');
+        setAssignmentNotice(`Assignment loaded${assignment.questionCount ? ` · target ${assignment.questionCount} questions` : ''}.`);
+        setActiveTab('practice');
+      }
+    } catch {
+      setAssignmentNotice('This assignment link could not be read. You can still practise normally.');
+    }
     setHistoryLoaded(true);
   }, []);
 
@@ -478,7 +511,7 @@ export default function Home() {
               <button onClick={() => setProvider('offline')} className={`rounded px-2 py-1 ${provider === 'offline' ? 'bg-amber-600 text-white' : 'text-gray-400'}`}>Offline</button>
             </div>
 
-            {(['practice', 'custom', 'whole', 'dashboard'] as const).map(tab => (
+            {(['practice', 'learn', 'custom', 'whole', 'dashboard', 'teacher'] as const).map(tab => (
               <button
                 key={tab}
                 className={`whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold transition ${activeTab === tab ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}
@@ -487,13 +520,14 @@ export default function Home() {
                   setMarkingError('');
                 }}
               >
-                {tab === 'practice' ? 'Practice' : tab === 'custom' ? 'Custom Marker' : tab === 'whole' ? 'Whole Exam' : 'Dashboard'}
+                {tab === 'practice' ? 'Practice' : tab === 'learn' ? 'Learning Hub' : tab === 'custom' ? 'Custom Marker' : tab === 'whole' ? 'Whole Exam' : tab === 'teacher' ? 'Teacher' : 'Dashboard'}
               </button>
             ))}
 
             <button onClick={() => setIsDataSheetOpen(true)} className="flex items-center gap-1 rounded-md px-2 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
               <BookOpen size={16} /> Data sheet
             </button>
+            <AccessibilityMenu />
           </div>
         </div>
       </header>
@@ -531,6 +565,8 @@ export default function Home() {
                 topicFilter={topicFilter}
               />
 
+              {assignmentNotice ? <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900"><strong>Teacher assignment:</strong> {assignmentNotice}</div> : null}
+
               <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-white p-4 shadow-sm">
                 <label className="flex items-center gap-2 font-medium">
                   <input
@@ -544,12 +580,31 @@ export default function Home() {
                 <Button variant="outline" size="sm" onClick={handleRandomQuestion}>Random question</Button>
                 <Button variant="outline" size="sm" onClick={handleWeakTopicQuestion}>Target weak topic</Button>
 
+                <select value={subjectFilter} onChange={event => { setSubjectFilter(event.target.value); setTopicFilter('all'); }} className="rounded border p-2 text-sm" aria-label="Filter by science">
+                  <option value="all">All sciences</option><option value="Biology">Biology</option><option value="Chemistry">Chemistry</option><option value="Physics">Physics</option>
+                </select>
+                <select value={courseFilter} onChange={event => setCourseFilter(event.target.value)} className="rounded border p-2 text-sm" aria-label="Filter by course">
+                  <option value="all">Combined + Separate</option><option value="combined">Combined Science</option><option value="separate">Separate Science</option>
+                </select>
+                <select value={tierFilter} onChange={event => setTierFilter(event.target.value)} className="rounded border p-2 text-sm" aria-label="Filter by tier">
+                  <option value="all">All tiers</option><option value="foundation">Foundation</option><option value="higher">Higher</option>
+                </select>
+                <select value={paperFilter} onChange={event => setPaperFilter(event.target.value)} className="rounded border p-2 text-sm" aria-label="Filter by paper">
+                  <option value="all">Both papers</option><option value="Paper 1">Paper 1</option><option value="Paper 2">Paper 2</option>
+                </select>
+
                 <select
                   value={topicFilter}
                   onChange={event => {
                     const value = event.target.value;
                     setTopicFilter(value);
-                    const pool = questions.filter(question => (value === 'all' || question.topic === value) && (difficultyFilter === 'all' || question.difficulty === difficultyFilter));
+                    const pool = questions.filter(question =>
+                      (subjectFilter === 'all' || question.subject === subjectFilter || question.subject === 'Science') &&
+                      (courseFilter !== 'combined' || question.course !== 'Separate only') &&
+                      (tierFilter !== 'foundation' || question.tier !== 'Higher only') &&
+                      (paperFilter === 'all' || question.paper === paperFilter || question.paper === 'Across papers') &&
+                      (value === 'all' || question.topic === value) &&
+                      (difficultyFilter === 'all' || question.difficulty === difficultyFilter));
                     if (pool.length) selectBankQuestion(pool[0].id);
                   }}
                   className="rounded border p-2 text-sm"
@@ -564,7 +619,13 @@ export default function Home() {
                   onChange={event => {
                     const value = event.target.value;
                     setDifficultyFilter(value);
-                    const pool = questions.filter(question => (topicFilter === 'all' || question.topic === topicFilter) && (value === 'all' || question.difficulty === value));
+                    const pool = questions.filter(question =>
+                      (subjectFilter === 'all' || question.subject === subjectFilter || question.subject === 'Science') &&
+                      (courseFilter !== 'combined' || question.course !== 'Separate only') &&
+                      (tierFilter !== 'foundation' || question.tier !== 'Higher only') &&
+                      (paperFilter === 'all' || question.paper === paperFilter || question.paper === 'Across papers') &&
+                      (topicFilter === 'all' || question.topic === topicFilter) &&
+                      (value === 'all' || question.difficulty === value));
                     if (pool.length) selectBankQuestion(pool[0].id);
                   }}
                   className="rounded border p-2 text-sm"
@@ -614,6 +675,9 @@ export default function Home() {
                   {isGeneratedQuestion ? <Badge className="bg-purple-600">Generated question</Badge> : <Badge variant="secondary">Question bank</Badge>}
                   <Badge variant="outline">{currentQuestion.commandWord}</Badge>
                   <Badge variant="outline">{currentQuestion.maxMarks} marks</Badge>
+                  <Badge variant="outline">{currentQuestion.subject}</Badge>
+                  <Badge variant="outline">{currentQuestion.paper}</Badge>
+                  <Badge variant="outline">{currentQuestion.tier === 'Higher only' ? 'Higher only' : 'Foundation + Higher'}</Badge>
                 </div>
 
                 <div className="mt-4 text-xl font-semibold leading-relaxed">{renderPrompt(currentQuestion.prompt)}</div>
@@ -649,6 +713,9 @@ export default function Home() {
 
                 <div className="mt-4">
                   <ImageAnswerUpload image={answerImage} onImage={handleAnswerImage} disabled={isAnalyzing} />
+                </div>
+                <div className="mt-4">
+                  <DiagramAnswerPad image={answerImage} onImage={handleAnswerImage} disabled={isAnalyzing} />
                 </div>
 
                 <div className="mt-4">
@@ -695,8 +762,10 @@ export default function Home() {
           </div>
         )}
 
+        {activeTab === 'learn' ? <LearningHub apiKey={apiKey} onPracticeQuestion={id => { setActiveTab('practice'); selectBankQuestion(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} /> : null}
         {activeTab === 'custom' ? <CustomMarker onFeedbackReceived={setFeedback} apiKey={apiKey} /> : null}
         {activeTab === 'whole' ? <WholeExamMarker apiKey={apiKey} /> : null}
+        {activeTab === 'teacher' ? <TeacherDashboard /> : null}
         {activeTab === 'dashboard' ? (
           <ProgressDashboard
             averagePercent={averagePercent}
