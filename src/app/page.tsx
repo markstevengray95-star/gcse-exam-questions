@@ -124,7 +124,6 @@ export default function Home() {
   const [markingError, setMarkingError] = useState('');
   const [strictness, setStrictness] = useState('standard');
   const [provider, setProvider] = useState('online');
-  const apiKey = '';
   const [activeTab, setActiveTab] = useState<ActiveTab>('practice');
   const [isDataSheetOpen, setIsDataSheetOpen] = useState(false);
   const [subjectFilter, setSubjectFilter] = useState('all');
@@ -782,9 +781,9 @@ export default function Home() {
           </div>
         )}
 
-        {activeTab === 'learn' ? <LearningHub apiKey={apiKey} onPracticeQuestion={id => { setActiveTab('practice'); selectBankQuestion(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} /> : null}
-        {activeTab === 'custom' ? <CustomMarker onFeedbackReceived={setFeedback} apiKey={apiKey} /> : null}
-        {activeTab === 'whole' ? <WholeExamMarker apiKey={apiKey} /> : null}
+        {activeTab === 'learn' ? <LearningHub onPracticeQuestion={id => { setActiveTab('practice'); selectBankQuestion(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} /> : null}
+        {activeTab === 'custom' ? <CustomMarker onFeedbackReceived={setFeedback} /> : null}
+        {activeTab === 'whole' ? <WholeExamMarker /> : null}
         {activeTab === 'teacher' ? <TeacherDashboard /> : null}
         {activeTab === 'dashboard' ? (
           <ProgressDashboard
