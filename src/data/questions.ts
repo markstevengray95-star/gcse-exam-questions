@@ -1,30 +1,7 @@
 import { specCoverageQuestions, specificationCoverageAudit } from './specCoverageQuestions';
-import type { GcseCourse, GcseSubject, GcseTier } from './specification';
-
-export interface Question {
-  id: string;
-  year: 'Year 10' | 'Year 11';
-  unit: string;
-  topic: string;
-  subTopic: string;
-  subject: GcseSubject;
-  paper: 'Paper 1' | 'Paper 2' | 'Across papers';
-  course: GcseCourse;
-  tier: GcseTier;
-  commandWord: string;
-  commandWordDefinition: string;
-  questionType: 'Short calculation' | 'Extended 6-mark level-of-response' | 'Data analysis' | 'Short explanation';
-  prompt: string;
-  maxMarks: number;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  hint: string;
-  template: string;
-  requiredKeywords: string[];
-  markScheme: string[];
-  modelAnswer: string;
-  pag?: string;
-  specificationPointId?: string;
-}
+import { expandedQuestionBank } from './expandedQuestionBank';
+import type { Question } from './questionTypes';
+export type { Question } from './questionTypes';
 
 const calculationQuestions: Question[] = [
   {
@@ -169,4 +146,29 @@ export const questionCoverageAudit = specificationCoverageAudit();
 export const questions: Question[] = [
   ...specCoverageQuestions,
   ...calculationQuestions,
+  ...expandedQuestionBank,
 ];
+
+function auditQuestionBank(bank: Question[]) {
+  const ids = new Set<string>();
+  for (const question of bank) {
+    if (ids.has(question.id)) throw new Error(`Duplicate GCSE Science question id: ${question.id}`);
+    ids.add(question.id);
+    if (!question.prompt.trim()) throw new Error(`Question ${question.id} has no prompt.`);
+    if (question.maxMarks < 1 || question.maxMarks > 6) throw new Error(`Question ${question.id} has invalid marks.`);
+    if (!question.markScheme.length) throw new Error(`Question ${question.id} has no mark scheme.`);
+    if (!question.modelAnswer.trim()) throw new Error(`Question ${question.id} has no model answer.`);
+  }
+  return {
+    total: bank.length,
+    Biology: bank.filter(question => question.subject === 'Biology').length,
+    Chemistry: bank.filter(question => question.subject === 'Chemistry').length,
+    Physics: bank.filter(question => question.subject === 'Physics').length,
+    Science: bank.filter(question => question.subject === 'Science').length,
+    calculations: bank.filter(question => question.questionType === 'Short calculation').length,
+    extended: bank.filter(question => question.questionType === 'Extended 6-mark level-of-response').length,
+    practicals: bank.filter(question => question.topic.toLowerCase().includes('required practical')).length,
+  };
+}
+
+export const questionBankAudit = auditQuestionBank(questions);
