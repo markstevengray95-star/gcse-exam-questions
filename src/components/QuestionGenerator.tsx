@@ -41,7 +41,7 @@ export function QuestionGenerator({ onUse, onPracticeQuestion, apiKey = '' }: Pr
     try {
       let activeKey = apiKey;
       if (!activeKey && typeof window !== 'undefined') {
-        try { activeKey = sessionStorage.getItem('aqaPhysicsApiKey') || ''; } catch { activeKey = ''; }
+        try { activeKey = sessionStorage.getItem('aqaGcseScienceApiKey') || ''; } catch { activeKey = ''; }
       }
       const endpoint = custom ? '/api/generate-custom-question' : '/api/generate-question';
       const payload = custom
@@ -86,9 +86,9 @@ export function QuestionGenerator({ onUse, onPracticeQuestion, apiKey = '' }: Pr
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-blue-700"><Sparkles size={17} /> Question generator</div>
-              <p className="mt-1 text-sm text-slate-600">Create an original, fully markable A-level-style question from any verified specification area, including all Paper 3 options.</p>
+              <p className="mt-1 text-sm text-slate-600">Create an original, fully markable GCSE Science-style question from any verified Biology, Chemistry or Physics specification area.</p>
             </div>
-            <Badge className="bg-emerald-600">Full AQA coverage</Badge>
+            <Badge className="bg-emerald-600">Full GCSE coverage</Badge>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
@@ -110,9 +110,9 @@ export function QuestionGenerator({ onUse, onPracticeQuestion, apiKey = '' }: Pr
             </div>
 
             <div className="rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2"><div><div className="text-sm font-bold text-purple-950">Generate from any typed area</div><div className="mt-1 text-xs text-purple-800">Try “capacitor discharge graphs”, “stellar classification”, “MRI”, “special relativity”, “op-amps”, or “uncertainty in required practicals”.</div></div><Badge className="bg-purple-700">Smart custom</Badge></div>
+              <div className="flex flex-wrap items-center justify-between gap-2"><div><div className="text-sm font-bold text-purple-950">Generate from any typed area</div><div className="mt-1 text-xs text-purple-800">Try “osmosis”, “moles and reacting masses”, “electrolysis”, “half-life”, “wave speed”, or “required practical evaluation”.</div></div><Badge className="bg-purple-700">Smart custom</Badge></div>
               <div className="mt-3 flex flex-col gap-2">
-                <input value={customArea} onChange={event => setCustomArea(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && customArea.trim() && !loading) void generate(true); }} placeholder="Type the exact physics area or skill you want..." className="min-w-0 rounded-xl border border-purple-200 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-purple-500" maxLength={160} aria-label="Custom physics area for question generation" />
+                <input value={customArea} onChange={event => setCustomArea(event.target.value)} onKeyDown={event => { if (event.key === 'Enter' && customArea.trim() && !loading) void generate(true); }} placeholder="Type the exact GCSE science area or skill you want..." className="min-w-0 rounded-xl border border-purple-200 bg-white p-2.5 text-sm outline-none focus:ring-2 focus:ring-purple-500" maxLength={160} aria-label="Custom GCSE science area for question generation" />
                 <Button onClick={() => void generate(true)} disabled={loading || customArea.trim().length < 3} className="rounded-xl bg-purple-700 hover:bg-purple-800">Generate on this area</Button>
               </div>
               <div className="mt-2 text-[11px] text-purple-700">With Gemini this creates a fresh AI variant. Without a key—or if AI generation fails—it falls back to the closest verified specification question instead of failing.</div>
