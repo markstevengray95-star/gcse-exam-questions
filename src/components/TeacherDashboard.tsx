@@ -271,7 +271,7 @@ export function TeacherDashboard() {
           <div className="flex items-center gap-2"><Users size={19} /><h3 className="text-lg font-bold">Add student progress snapshot</h3></div>
           <p className="mt-1 text-xs text-gray-500">Useful for a quick class overview without requiring student accounts. Enter exported/latest percentages from each student.</p>
           <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
-            <div className="text-sm font-semibold text-blue-950">Import directly from a student's Learning Hub</div>
+            <div className="text-sm font-semibold text-blue-950">Import directly from a student&apos;s Learning Hub</div>
             <div className="mt-2 flex gap-2">
               <input value={snapshotCode} onChange={event => setSnapshotCode(event.target.value)} placeholder="Paste progress snapshot" className="min-w-0 flex-1 rounded border bg-white p-2 text-xs" />
               <Button size="sm" onClick={importSnapshot} disabled={!snapshotCode.trim()}>Import</Button>
