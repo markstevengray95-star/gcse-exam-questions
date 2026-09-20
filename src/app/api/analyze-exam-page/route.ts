@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI, SchemaType, type ResponseSchema } from '@google/generative-ai';
+import { getRequestAiKey } from '@/lib/serverAi';
 
 const pageSchema: ResponseSchema = {
   type: SchemaType.OBJECT,
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
     const pageNumber = clamp(body?.pageNumber, 1, 200);
     const totalPages = clamp(body?.totalPages, 1, 200);
     const paperLabel = String(body?.paperLabel || 'Not supplied');
-    const activeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    const activeKey = getRequestAiKey(req);
 
     if (!imageData) return NextResponse.json({ error: 'No page image was supplied.' }, { status: 400 });
     if (!activeKey) return NextResponse.json({ error: 'Handwriting analysis requires a Gemini API key in this session or on the server.' }, { status: 400 });
