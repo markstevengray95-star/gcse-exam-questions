@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI, SchemaType, type ResponseSchema } from '@google/generative-ai';
 import { getIndicativeGrade, PRACTICE_GRADE_NOTICE } from '@/lib/grading';
+import { getRequestAiKey } from '@/lib/serverAi';
 
 const responseSchema: ResponseSchema = {
   type: SchemaType.OBJECT,
@@ -132,7 +133,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Please provide the completed student script or paste the student answers.' }, { status: 400 });
     }
 
-    const activeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    const activeKey = getRequestAiKey(req);
     if (!activeKey) {
       return NextResponse.json({ error: 'Whole-exam marking requires a Gemini API key in this session or on the server.' }, { status: 400 });
     }
