@@ -1,16 +1,16 @@
-import { NextResponse } from 'next/server';
-import { getServerAiSource, hasServerAiKey } from '@/lib/serverAi';
+import { NextRequest, NextResponse } from 'next/server';
+import { getRequestAiSource, hasRequestAiKey } from '@/lib/serverAi';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
-  const connected = hasServerAiKey();
+export async function GET(req: NextRequest) {
+  const connected = hasRequestAiKey(req);
 
   return NextResponse.json(
     {
       connected,
       provider: connected ? 'gemini' : 'offline',
-      source: connected ? getServerAiSource() : null,
+      source: connected ? getRequestAiSource(req) : null,
     },
     {
       headers: {
