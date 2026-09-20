@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI, SchemaType, ResponseSchema } from '@google/generative-ai';
 import { offlineMark } from '@/lib/offlineMarker';
+import { getRequestAiKey } from '@/lib/serverAi';
 
 const responseSchema: ResponseSchema = {
   type: SchemaType.OBJECT,
@@ -240,7 +241,7 @@ export async function POST(req: NextRequest) {
       // Deterministic fallback: works in Vercel/browser deployments without Ollama or an API key.
       return NextResponse.json(clampResult(offlineMark(body), numericMaxMarks));
     } else {
-      const activeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+      const activeKey = getRequestAiKey(req);
       if (!activeKey) {
         const result = clampResult(offlineMark(body), numericMaxMarks);
         return NextResponse.json({ ...result, fallbackUsed: true, fallbackReason: 'No AI API key configured; offline examiner used automatically.' });
