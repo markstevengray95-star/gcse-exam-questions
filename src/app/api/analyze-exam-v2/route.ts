@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI, SchemaType, type ResponseSchema } from '@google/generative-ai';
 import { getIndicativeGrade, PRACTICE_GRADE_NOTICE } from '@/lib/grading';
+import { getRequestAiKey } from '@/lib/serverAi';
 
 const responseSchema: ResponseSchema = {
   type: SchemaType.OBJECT,
@@ -191,7 +192,7 @@ export async function POST(req: NextRequest) {
     const markSchemeText = String(body?.markSchemeText || '').trim();
     const paperLabel = String(body?.paperLabel || '').trim();
     const scriptPages = normalizePages(body?.scriptPages);
-    const activeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    const activeKey = getRequestAiKey(req);
 
     if (!body?.examFileData && !examText && !scriptPages.length) {
       return NextResponse.json({ error: 'Provide a completed script file, pasted answers, or at least one photographed script page.' }, { status: 400 });
