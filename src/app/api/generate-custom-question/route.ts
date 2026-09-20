@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI, SchemaType, type ResponseSchema } from '@google/generative-ai';
 import { specificationPoints } from '@/data/specification';
 import { specCoverageQuestions } from '@/data/specCoverageQuestions';
+import { getRequestAiKey } from '@/lib/serverAi';
 
 const responseSchema: ResponseSchema = {
   type: SchemaType.OBJECT,
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
     area = String(body?.area || '').trim().slice(0, 160);
     marks = Math.max(2, Math.min(6, Math.trunc(Number(body?.marks) || 4)));
     difficulty = normaliseDifficulty(body?.difficulty);
-    const activeKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    const activeKey = getRequestAiKey(req);
 
     if (area.length < 3) {
       return NextResponse.json({ error: 'Type a GCSE science area or skill, for example “osmosis”, “electrolysis” or “wave speed”.' }, { status: 400 });
