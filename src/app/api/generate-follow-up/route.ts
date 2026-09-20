@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI, ResponseSchema, SchemaType } from '@google/generative-ai';
 import { questions, type Question } from '@/data/questions';
+import { getRequestAiKey } from '@/lib/serverAi';
 
 type FollowUpQuestion = Question & { source: string; focus: string };
 
@@ -114,7 +115,7 @@ export async function POST(req: NextRequest) {
     }
 
     const focus = focusFrom(body);
-    const key = String(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '');
+    const key = String(getRequestAiKey(req) || '');
     if (!key) return NextResponse.json({ question: fallbackQuestion(current, focus), fallbackUsed: true });
 
     const prompt = `Create ONE new, original AQA GCSE Science practice question that directly targets a weakness from a student's previous attempt.
