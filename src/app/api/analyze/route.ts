@@ -370,14 +370,24 @@ export async function POST(req: NextRequest) {
       const verifiedText = verified.response.text();
       const finalResult = clampResult(JSON.parse(sanitizeJson(verifiedText)), numericMaxMarks);
       const finalDifference = Math.abs(Number(finalResult.marksAwarded || 0) - Number(offline.marksAwarded || 0));
+      const verificationChange = Math.abs(Number(finalResult.marksAwarded || 0) - Number(primary.marksAwarded || 0));
+      const unresolvedDisagreement = finalDifference > 1 || verificationChange > 1;
+      const reportedConfidence = Math.max(0, Math.min(100, Number(finalResult.examinerConfidence || 0)));
+      const adjustedConfidence = unresolvedDisagreement ? Math.min(reportedConfidence, 74) : reportedConfidence;
 
       return NextResponse.json({
         ...finalResult,
+        examinerConfidence: adjustedConfidence,
+        reviewRecommended: Boolean(finalResult.reviewRecommended) || unresolvedDisagreement,
+        confidenceReason: unresolvedDisagreement
+          ? `${String(finalResult.confidenceReason || 'Independent verification completed.')} The marking engines still differ materially, so teacher review is recommended.`
+          : finalResult.confidenceReason,
         markerEngine: 'ai-verified',
         verificationApplied: true,
         primaryAiMark: primary.marksAwarded,
         offlineCrossCheckMark: offline.marksAwarded,
         markingDifference: finalDifference,
+        verificationChange,
       });
     } catch (verificationError) {
       console.error('AI verification pass failed; returning primary mark:', verificationError);
