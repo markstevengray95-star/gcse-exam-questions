@@ -163,6 +163,9 @@ function buildContents(body: any) {
     questionPrompt,
     questionInlineData,
     commandWord,
+    questionType,
+    subject,
+    requiredKeywords,
     maxMarks,
     markScheme,
     markSchemeInlineData,
@@ -178,7 +181,15 @@ function buildContents(body: any) {
   }
 
   contents.push({
-    text: `Command Word: ${commandWord || 'None specified'}\nMaximum Marks: ${Number.isFinite(Number(maxMarks)) ? Number(maxMarks) : 0}`,
+    text: [
+      `Subject: ${subject || 'Science'}`,
+      `Question Type: ${questionType || 'Not specified'}`,
+      `Command Word: ${commandWord || 'None specified'}`,
+      `Maximum Marks: ${Number.isFinite(Number(maxMarks)) ? Number(maxMarks) : 0}`,
+      Array.isArray(requiredKeywords) && requiredKeywords.length
+        ? `Diagnostic keywords (never use as a substitute for mark-scheme evidence): ${requiredKeywords.join(', ')}`
+        : '',
+    ].filter(Boolean).join('\n'),
   });
 
   if (markScheme) {
@@ -215,9 +226,66 @@ function clampResult(data: any, maxMarks: number) {
   return { ...data, marksAwarded: marks, totalMarks: safeMax };
 }
 
+function isCalculationRequest(body: any) {
+  const commandWord = String(body?.commandWord || '');
+  const questionType = String(body?.questionType || '');
+  const scheme = Array.isArray(body?.markScheme) ? body.markScheme.map(String).join(' ') : '';
+  return (
+    questionType === 'Short calculation' ||
+    /calculate|show that/i.test(commandWord) ||
+    /\\[(M|A|C)\\d+\\]/i.test(scheme) ||
+    /equation|substitut|calculation|working/i.test(scheme)
+  );
+}
+
+function needsVerification(body: any, primary: any, offline: any) {
+  const difference = Math.abs(Number(primary?.marksAwarded || 0) - Number(offline?.marksAwarded || 0));
+  return (
+    Boolean(body?.studentInlineData) ||
+    String(body?.questionType || '') === 'Extended 6-mark level-of-response' ||
+    isCalculationRequest(body) ||
+    Number(primary?.examinerConfidence || 0) < 82 ||
+    Boolean(primary?.reviewRecommended) ||
+    difference > 1 ||
+    (Array.isArray(primary?.misconceptions) && primary.misconceptions.length > 0)
+  );
+}
+
+function verificationPrompt(primary: any, offline: any, body: any) {
+  const difference = Math.abs(Number(primary?.marksAwarded || 0) - Number(offline?.marksAwarded || 0));
+  return `INDEPENDENT VERIFICATION PASS
+
+You are now a second senior GCSE Science examiner. Re-mark the response independently from the original question, student answer and supplied mark scheme above. The first AI result and the rule-based cross-check are evidence to audit, not authorities.
+
+FIRST AI RESULT:
+${JSON.stringify(primary)}
+
+RULE-BASED CROSS-CHECK SUMMARY:
+- mark: ${offline?.marksAwarded}/${offline?.totalMarks}
+- confidence: ${offline?.examinerConfidence}
+- difference from first AI mark: ${difference}
+- review recommended: ${Boolean(offline?.reviewRecommended)}
+
+VERIFICATION RULES:
+1. Re-check every awarded mark against explicit student evidence and the supplied mark scheme.
+2. Do not award two marks for the same evidence unless the scheme genuinely separates them.
+3. A misconception or contradiction does NOT create a negative mark. It only prevents credit for a point it directly invalidates.
+4. Only use level-of-response bands when Question Type is exactly "Extended 6-mark level-of-response". A six-mark calculation or point-based question must stay point-based.
+5. For calculations, separate method/equation marks from accuracy marks. Preserve legitimate follow-through after an arithmetic slip when the scheme permits it.
+6. Missing units only lose credit when the supplied marking point requires a unit.
+7. For Explain, require the scientific causal link where the scheme requires one. For Compare, require a direct comparison. For Evaluate, use the evidence and judgement demanded by the actual mark scheme; do not impose extra essay structure.
+8. Scientifically equivalent wording must receive credit when its meaning matches the scheme.
+9. Keywords are diagnostic only; never award a mark merely because a word appears.
+10. If the first AI mark and offline mark differ, resolve the disagreement from the actual student evidence rather than averaging them.
+11. Keep marksAwarded within 0–${Number(body?.maxMarks) || 0}, and totalMarks must equal the stated maximum.
+
+Return a COMPLETE corrected marking result matching the required JSON schema. Do not include hidden reasoning or a chain of thought; include only concise examiner evidence and conclusions in the schema fields.`;
+}
+
 export async function POST(req: NextRequest) {
   let body: any;
   let numericMaxMarks = 0;
+
   try {
     body = await req.json();
     const {
@@ -234,45 +302,107 @@ export async function POST(req: NextRequest) {
     }
 
     numericMaxMarks = Math.max(0, Math.trunc(Number(maxMarks) || 0));
-    const requestContents = buildContents(body);
-    let responseText = '';
+    const offline = clampResult(offlineMark(body), numericMaxMarks);
 
     if (provider === 'offline') {
-      // Deterministic fallback: works in Vercel/browser deployments without Ollama or an API key.
-      return NextResponse.json(clampResult(offlineMark(body), numericMaxMarks));
-    } else {
-      const activeKey = getRequestAiKey(req);
-      if (!activeKey) {
-        const result = clampResult(offlineMark(body), numericMaxMarks);
-        return NextResponse.json({ ...result, fallbackUsed: true, fallbackReason: 'No AI API key configured; offline examiner used automatically.' });
-      }
-
-      const genAI = new GoogleGenerativeAI(activeKey);
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-2.5-flash',
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema,
-          temperature: 0.1,
-        },
+      return NextResponse.json({
+        ...offline,
+        markerEngine: 'offline',
+        verificationApplied: false,
       });
+    }
 
-      const result = await model.generateContent(requestContents);
-      responseText = result.response.text();
+    const activeKey = getRequestAiKey(req);
+    if (!activeKey) {
+      return NextResponse.json({
+        ...offline,
+        markerEngine: 'offline',
+        verificationApplied: false,
+        fallbackUsed: true,
+        fallbackReason: 'No AI API key configured; offline examiner used automatically.',
+      });
+    }
+
+    const requestContents = buildContents(body);
+    const genAI = new GoogleGenerativeAI(activeKey);
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema,
+        temperature: 0,
+      },
+    });
+
+    const first = await model.generateContent(requestContents);
+    const firstText = first.response.text();
+
+    let primary: any;
+    try {
+      primary = clampResult(JSON.parse(sanitizeJson(firstText)), numericMaxMarks);
+    } catch {
+      console.error('Failed to parse primary grading response:', firstText);
+      return NextResponse.json({
+        ...offline,
+        markerEngine: 'offline',
+        verificationApplied: false,
+        fallbackUsed: true,
+        fallbackReason: 'Primary AI response was invalid; offline examiner used automatically.',
+      });
+    }
+
+    const difference = Math.abs(Number(primary.marksAwarded || 0) - Number(offline.marksAwarded || 0));
+    if (!needsVerification(body, primary, offline)) {
+      return NextResponse.json({
+        ...primary,
+        markerEngine: 'ai',
+        verificationApplied: false,
+        offlineCrossCheckMark: offline.marksAwarded,
+        markingDifference: difference,
+      });
     }
 
     try {
-      const parsed = JSON.parse(sanitizeJson(responseText));
-      return NextResponse.json(clampResult(parsed, numericMaxMarks));
-    } catch (parseError) {
-      console.error('Failed to parse grading response:', responseText);
-      return NextResponse.json({ error: 'The AI generated an invalid grading response. Please try submitting again.' }, { status: 500 });
+      const verified = await model.generateContent([
+        ...requestContents,
+        { text: verificationPrompt(primary, offline, body) },
+      ] as any);
+      const verifiedText = verified.response.text();
+      const finalResult = clampResult(JSON.parse(sanitizeJson(verifiedText)), numericMaxMarks);
+      const finalDifference = Math.abs(Number(finalResult.marksAwarded || 0) - Number(offline.marksAwarded || 0));
+
+      return NextResponse.json({
+        ...finalResult,
+        markerEngine: 'ai-verified',
+        verificationApplied: true,
+        primaryAiMark: primary.marksAwarded,
+        offlineCrossCheckMark: offline.marksAwarded,
+        markingDifference: finalDifference,
+      });
+    } catch (verificationError) {
+      console.error('AI verification pass failed; returning primary mark:', verificationError);
+      return NextResponse.json({
+        ...primary,
+        markerEngine: 'ai',
+        verificationApplied: false,
+        verificationFailed: true,
+        offlineCrossCheckMark: offline.marksAwarded,
+        markingDifference: difference,
+        reviewRecommended: true,
+        confidenceReason: `${String(primary?.confidenceReason || 'AI marking completed.')} Independent verification could not be completed, so review is recommended.`,
+      });
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('AI marking failed, automatically using offline fallback:', error);
     if (body) {
       const result = clampResult(offlineMark(body), numericMaxMarks);
-      return NextResponse.json({ ...result, fallbackUsed: true, fallbackReason: 'AI service unavailable; offline marker used automatically.' });
+      return NextResponse.json({
+        ...result,
+        markerEngine: 'offline',
+        verificationApplied: false,
+        fallbackUsed: true,
+        fallbackReason: 'AI service unavailable; offline marker used automatically.',
+      });
     }
     return NextResponse.json({ error: 'Unable to process marking request.' }, { status: 500 });
   }
