@@ -25,6 +25,12 @@ export interface AnalysisResult {
   reviewRecommended?: boolean;
   fallbackUsed?: boolean;
   fallbackReason?: string;
+  markerEngine?: 'offline' | 'ai' | 'ai-verified';
+  verificationApplied?: boolean;
+  verificationFailed?: boolean;
+  primaryAiMark?: number;
+  offlineCrossCheckMark?: number;
+  markingDifference?: number;
 }
 
 interface Props {
@@ -87,6 +93,20 @@ export function FeedbackDisplay({ result, onRewrite }: Props) {
               )}
             </div>
           </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {result.markerEngine === 'ai-verified' ? <Badge className="bg-indigo-700">AI mark independently verified</Badge> : null}
+            {result.markerEngine === 'ai' ? <Badge className="bg-blue-700">AI examiner</Badge> : null}
+            {result.markerEngine === 'offline' ? <Badge className="bg-amber-600">Offline examiner</Badge> : null}
+            {typeof result.offlineCrossCheckMark === 'number' && result.markerEngine !== 'offline' ? (
+              <Badge variant="outline">Offline cross-check: {result.offlineCrossCheckMark}/{totalMarks}</Badge>
+            ) : null}
+            {result.verificationFailed ? <Badge className="bg-amber-700">Verification incomplete</Badge> : null}
+          </div>
+          {result.verificationApplied && typeof result.primaryAiMark === 'number' && result.primaryAiMark !== marksAwarded ? (
+            <div className="mt-3 rounded border border-indigo-200 bg-indigo-50 p-3 text-sm text-indigo-900">
+              The verification pass changed the first AI mark from {result.primaryAiMark}/{totalMarks} to {marksAwarded}/{totalMarks} after re-checking the evidence.
+            </div>
+          ) : null}
           <div className="mt-4 rounded border bg-gray-50 p-3 text-sm text-gray-700">{PRACTICE_GRADE_NOTICE}</div>
 
           {typeof confidence === 'number' && (
